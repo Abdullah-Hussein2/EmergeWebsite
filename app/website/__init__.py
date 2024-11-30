@@ -36,7 +36,7 @@ def create_app():
 
     # Function to setup roles
     def setup_roles():
-        roles = ['User', 'Admin', 'Poster']
+        roles = ['User', 'Admin', 'Poster' , 'Doctor']
         for role_name in roles:
             if not Role.query.filter_by(name=role_name).first():
                 new_role = Role(name=role_name)
@@ -52,6 +52,10 @@ def create_app():
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
     login_manager.init_app(app)
+
+    def allowed_file(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 
     # User loader for Flask-Login
     @login_manager.user_loader

@@ -13,6 +13,8 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(150), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    description = db.Column(db.String(500))
+    image = db.Column(db.LargeBinary)
     is_active = db.Column(db.Boolean(), nullable=False, server_default='1')  # Required by Flask-User
     roles = db.relationship('Role', secondary='user_roles', backref='users')
     def has_roles(self, *role_names):
@@ -39,3 +41,4 @@ class UserRoles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id', ondelete='CASCADE'))
+

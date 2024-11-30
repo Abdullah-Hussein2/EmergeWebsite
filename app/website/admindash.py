@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template , redirect , url_for, flash
+from flask import Blueprint, render_template , redirect , url_for, flash , Response
 from flask_login import login_required , current_user
 from .models import User, Role
 from flask_user import roles_required
@@ -12,8 +12,6 @@ from .models import User, Role
 from flask_login import login_required
 
 @admindash.route('/Users_dashboard', methods=['GET', 'POST'])
-@login_required
-@roles_required('Admin')
 def Users_dashboard():
     # Ensure that the user has the 'Admin' role
     if 'Admin' not in [role.name for role in current_user.roles]:
@@ -44,8 +42,6 @@ def Users_dashboard():
     return render_template("Users_dashboard.html", section=section, admins=admins, roles=roles, search_term=search_term)
 
 @admindash.route("/dashboard")
-@login_required
-@roles_required('Admin')
 def dashboard():
     total_users = User.query.count()
     return render_template("dashboard.html", total_user=total_users)
@@ -53,8 +49,6 @@ def dashboard():
 
 
 @admindash.route('/add_role_to_user', methods=['POST'])
-@login_required
-@roles_required('Admin')
 def add_role_to_user():
     if request.method == 'POST':
         user_id = request.form.get('user_id')
@@ -91,8 +85,6 @@ def add_role_to_user():
 
 
 @admindash.route('/delete_user/<int:user_id>', methods=['POST'])
-@login_required
-@roles_required('Admin')
 def delete_user(user_id):
     # Fetch the user by ID
     user = User.query.get(user_id)
@@ -109,35 +101,104 @@ def delete_user(user_id):
 
 
 @admindash.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-@login_required
-@roles_required('Admin')
 def edit_user(user_id):
-    user = User.query.get(user_id)  # Retrieve the user by ID
-    all_roles = Role.query.all()  # Fetch all roles
+    # Fetch the user from the database
+    user = User.query.get_or_404(user_id)
 
+    # If the form is submitted via POST method
     if request.method == 'POST':
         # Get the form data
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        role_ids = request.form.getlist('role_id')  # Get selected role IDs
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        email = request.form['email']
+        password = request.form['password']
+        role_ids = request.form.getlist('role_ids')  # Get selected role IDs
 
-        # Update basic user info
+        # Handle optional password update (Hash the password if it's being updated)
+        if password:
+            user.set_password(password)  # Make sure to hash the password (use a method like set_password)
+
+        # Update the user information
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
 
-        # Update password if a new password is provided
-        if password:
-            user.set_password(password)  # Assuming you have a set_password method to hash the password
+        # Handle image upload (optional)
+        image = request.files.get('image')
+        if image:
+            user.image = image.read()  # Store the image as binary (or use a path to save it on disk)
 
-        # Update roles
-        roles = Role.query.filter(Role.id.in_(role_ids)).all()  # Get the selected roles
-        user.roles = roles  # Assign the roles to the user
+        # Assign roles
+        user.roles.clear()  # Clear existing roles
+        for role_id in role_ids:
+            role = Role.query.get(role_id)
+            if role:
+                user.roles.append(role)
 
+        # Save the changes to the database
         db.session.commit()
 
-        return redirect(url_for('admindash.Users_dashboard'))
+        flash('User updated successfully!', 'success')
+        return redirect(url_for('admindash.Users_dashboard'))  # Redirect to users dashboard
+
+    # Fetch all roles for the select input
+    all_roles = Role.query.all()
 
     return render_template('edit_user.html', user=user, all_roles=all_roles)
+
+@admindash.route('/add_user', methods=['GET', 'POST'])
+def add_user():
+    if request.method == 'POST':
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        email = request.form['email']
+        password = request.form['password']
+        role_ids = request.form.getlist('role_ids')  # Get the selected role IDs
+
+        # Handle image upload
+        image = request.files['image']
+        image_binary = None
+        if image:
+            image_binary = image.read()  # Read image as binary data
+
+        # Create new user instance
+        new_user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,  # You should hash the password before saving
+            image=image_binary
+        )
+
+        # Assign roles
+        for role_id in role_ids:
+            role = Role.query.get(role_id)
+            if role:
+                new_user.roles.append(role)
+
+        # Save the user to the database
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('User added successfully!', 'success')
+        return redirect(url_for('admindash.Users_dashboard'))  # Redirect to users dashboard
+
+    # Retrieve all roles to populate the dropdown
+    all_roles = Role.query.all()
+
+    return render_template('add_user.html', all_roles=all_roles)
+
+
+@admindash.route('/view_user/<int:user_id>', methods=['GET'])
+def view_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    # Return the image as a response in a format that the browser can display
+    if user.image:
+        return Response(user.image, mimetype='image/jpeg')  # Or image/png, depending on your image format
+    else:
+        return "No image available", 404
+
+# <img src="{{ url_for('admindash.view_user', user_id=user.id) }}" alt="User Image"> Display Image in a Template
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}

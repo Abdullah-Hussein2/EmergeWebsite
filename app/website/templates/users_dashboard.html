@@ -162,6 +162,45 @@
             border: none;
             border-radius: 4px;
         }
+
+        .add-user-button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-user-button:hover {
+            background-color: #45a049;
+        }
+
+        #addUserForm {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        #addUserForm input, #addUserForm textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        #addUserForm button {
+            margin-top: 10px;
+        }
+
+        #addUserForm button.cancel-button {
+            background-color: #f44336;
+        }
+
     </style>
 </head>
 <body>
@@ -169,6 +208,35 @@
 <div class="dashboard-container">
     <h1 class="dashboard-title">Admin Dashboard</h1>
     <p class="welcome-message">Welcome, {{ current_user.first_name }} {{ current_user.last_name }}!</p>
+
+    <!-- Add User Button -->
+    < <a href="{{ url_for('admindash.add_user') }}">
+        <button class="add-user-button">Add New User</button>
+    </a>
+
+    <!-- Add User Form -->
+    <div id="addUserForm">
+        <h3>Add New User</h3>
+        <form action="{{ url_for('admindash.add_user') }}" method="POST" enctype="multipart/form-data">
+            <input type="text" name="first_name" placeholder="First Name" required><br>
+            <input type="text" name="last_name" placeholder="Last Name" required><br>
+            <input type="email" name="email" placeholder="Email" required><br>
+            <textarea name="description" placeholder="Description"></textarea><br>
+
+            <label for="role">Assign Role</label>
+            <select name="role_id" class="role-select" required>
+                {% for role in roles %}
+                    <option value="{{ role.id }}">{{ role.name }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="image">Upload Image</label>
+            <input type="file" name="image" accept="image/*"><br>
+
+            <button type="submit" class="save-button">Add User</button>
+            <button type="button" class="cancel-button" onclick="toggleAddUserForm()">Cancel</button>
+        </form>
+    </div>
 
     <!-- Tabs for Role Sections -->
     <div class="tabs">
@@ -275,6 +343,12 @@
         document.getElementById(roleName).classList.add('active');
         var clickedTab = document.querySelector('.tab[onclick="showTab(\'' + roleName + '\')"]');
         clickedTab.classList.add('active-tab');
+    }
+
+    // Toggle Add User Form Visibility
+    function toggleAddUserForm() {
+        var form = document.getElementById('addUserForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
 </script>
 

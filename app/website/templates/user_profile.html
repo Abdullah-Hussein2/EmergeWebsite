@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .profile-container {
+            width: 60%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        .profile-container img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .profile-header {
+            text-align: center;
+        }
+
+        .profile-header h2 {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .profile-header p {
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .profile-info {
+            margin-top: 30px;
+        }
+
+        .profile-info label {
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        .profile-info .info-value {
+            font-size: 1rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>{{ user.first_name }} {{ user.last_name }}'s Profile</h2>
+        <!-- Display user image -->
+        <img src="{{ url_for('views.user_image', user_id=user.id) }}" alt="User Image">
+        <p>Email: {{ user.email }}</p>
+    </div>
+
+    <div class="profile-info">
+        <h3>Additional Information</h3>
+        <p><strong>Description:</strong> {{ user.description }}</p>
+        <p><strong>Roles:</strong>
+            {% for role in user.roles %}
+                {{ role.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

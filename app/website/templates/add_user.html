@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User</title>
+    <title>Add New User</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,37 +75,37 @@
 <body>
 
 <div class="form-container">
-    <h2>Edit User Details</h2>
-    <form action="{{ url_for('admindash.edit_user', user_id=user.id) }}" method="POST" enctype="multipart/form-data">
+    <h2>Add New User</h2>
+    <form action="{{ url_for('admindash.add_user') }}" method="POST" enctype="multipart/form-data">
         <!-- User First Name -->
         <label for="first_name">First Name:</label>
-        <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+        <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required>
 
         <!-- User Last Name -->
         <label for="last_name">Last Name:</label>
-        <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+        <input type="text" id="last_name" name="last_name" placeholder="Enter last name" required>
 
         <!-- User Email -->
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+        <input type="email" id="email" name="email" placeholder="Enter email" required>
 
         <!-- User Password -->
-        <label for="password">New Password (Leave blank if not changing):</label>
-        <input type="password" id="password" name="password">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
 
         <!-- User Role -->
         <label for="roles">Assign Roles:</label>
         <select id="roles" name="role_ids" multiple required>
             {% for role in all_roles %}
-                <option value="{{ role.id }}" {% if role in user.roles %}selected{% endif %}>{{ role.name }}</option>
+                <option value="{{ role.id }}">{{ role.name }}</option>
             {% endfor %}
         </select>
 
-        <!-- User Image Upload (Optional) -->
+        <!-- User Image Upload -->
         <label for="image">Upload Profile Image:</label>
         <input type="file" id="image" name="image" accept="image/*">
 
-        <button type="submit">Save Changes</button>
+        <button type="submit">Add User</button>
         <a href="{{ url_for('admindash.Users_dashboard') }}">
             <button type="button" class="cancel-button">Cancel</button>
         </a>
