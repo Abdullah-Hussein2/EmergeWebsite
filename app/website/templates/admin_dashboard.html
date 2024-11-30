@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .dashboard-container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        /* Dashboard Title */
+        .dashboard-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        /* User Management Section */
+        .user-management h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        /* User Table */
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-table th, .user-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .user-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .user-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+
+        /* No Role Text */
+        .no-role {
+            color: #f44336;
+        }
+
+        /* Select and Button */
+        .role-select {
+            padding: 8px;
+            margin-right: 10px;
+            font-size: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .assign-button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .assign-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <h1 class="dashboard-title">Admin Dashboard</h1>
+
+    <!-- Display a welcome message -->
+    <p class="welcome-message">Welcome, {{ current_user.first_name }} {{ current_user.last_name }}!</p>
+
+     <!-- Search Form -->
+     <form method="GET" action="{{ url_for('admindash.admin_dashboard') }}">
+        <input type="text" name="search" placeholder="Search by name or email" value="{{ request.args.get('search') }}">
+        <button type="submit">Search</button>
+    </form>
+
+
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <!-- User Management Section -->
+    <div class="user-management">
+        <h2>User Management</h2>
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Assign Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in user %}
+                <tr>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.roles %}
+                            {% for role in user.roles %}
+                                <span class="role-badge">{{ role.name }}</span><br>
+                            {% endfor %}
+                        {% else %}
+                            <span class="no-role">No role assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('admindash.add_role_to_user') }}" method="POST">
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <select name="role_id" class="role-select" required>
+                                {% for role in all_roles %}
+                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="assign-button">Assign Role</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

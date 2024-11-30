@@ -1,8 +1,11 @@
 from flask import Blueprint , render_template , redirect , url_for , request , flash
 from . import db
-from .models import User
+from .models import User , Role
 from flask_login import login_user , logout_user , login_required , current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+
+
+
 auth = Blueprint("auth", __name__)
 
 @auth.route("/login" , methods=['GET' , 'POST'])
@@ -14,7 +17,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                flash('logged in!' , category='success')
+                flash('Logged in successfully!' , category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
             else:
@@ -22,39 +25,70 @@ def login():
         else:
             flash('Email is incorrect or dose\'t exist.' , category='error')
 
-    return render_template("login.html")
+    return render_template("login.html" , user=current_user)
+
+
+
+
+
+
+
+
+
 
 @auth.route("/signup" , methods=['GET' , 'POST'])
 def sign_up():
     if request.method == 'POST':
 
         email = request.form.get('email')
-        username = request.form.get('username')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
         password1 = request.form.get('Password1')
         password2 = request.form.get('Password2')
         email_exists = User.query.filter_by(email=email).first()
-        username_exists = User.query.filter_by(username=username).first()
         if email_exists:
             flash('Email is already in use.', category='error')
-        elif username_exists:
-            flash('Username is already in use.', category='error')
         elif password1 != password2:
-            flash('Password don\'t match!', category='error')
-        elif len(username) < 2:
-            flash('Username is too short.', category='error')
+            flash('Passwords do not match!', category='error')
         elif len(password1) < 6:
-            flash('Password is too short.', category='error')
+            flash('Password must be at least 6 characters long.', category='error')
         else:
-            new_user = User(email=email , username=username , password=generate_password_hash(password1))
+            default_role = Role.query.filter_by(name='User').first()
+            if not default_role:
+                # Create the default role if it doesn't exist
+                default_role = Role(name='User', label='Regular User')
+                db.session.add(default_role)
+                db.session.commit()
+
+
+            new_user = User(email=email,
+                            first_name=first_name,
+                            last_name=last_name,
+                            is_active=True ,
+                            password=generate_password_hash(password1))
+
+
+
+            new_user.roles.append(default_role)
             db.session.add(new_user)
             db.session.commit()
+
+
             login_user(new_user, remember=True)
             flash('User created' , category='success')
             return redirect(url_for('views.home'))
-    return render_template("signup.html")
+    return render_template("signup.html" , user=current_user)
 
-@login_required
+
+
+
+
+
+
+
+
 @auth.route("/logout")
+@login_required
 def logout():
     logout_user()
     return redirect(url_for("views.home"))

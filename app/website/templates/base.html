@@ -26,20 +26,24 @@
                 <li><a href="/" class="link">About</a></li>
                 <li><a href="/" class="link">About</a></li>
                 <li><a href="/" class="link">About</a></li>
-                <li><a href="/" class="link">About</a></li>
+                <li><a href="/posts" class="link">About</a></li>
                 <li><a href="/login" class="link">About</a></li>
                 <li><a href="/signup" class="link">About</a></li>
             </ul>
         </div>
         <div class="nav-button">
+            {% if user.is_authenticated %}
+            <button href="/Logout" class="btn white-btn" >Logout</button>
+            {% else %}
             <button href="/login" class="btn white-btn" >Sign In</button>
             <button href="/signup" class="btn white-btn" >Sign Up</button>
+            {% endif %}
         </div>
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %} {% for category, message in messages %} {% if category ==
         'error' %}
-        
+
         {% endif %} {% endfor %} {% endif %} {% endwith %}
     {% block content %}
 
