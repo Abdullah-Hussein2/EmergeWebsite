@@ -13,24 +13,18 @@ from flask_login import login_required
 
 @admindash.route('/Users_dashboard', methods=['GET', 'POST'])
 def Users_dashboard():
-    # Ensure that the user has the 'Admin' role
     if 'Admin' not in [role.name for role in current_user.roles]:
         flash('You do not have permission to access this page.', 'danger')
         return redirect(url_for('views.home'))
 
-    # Get the section from the query string or default to 'overview'
     section = request.args.get('section', 'overview')
 
-    # Initialize the search term, if present in the query string
     search_term = request.args.get('search', '').strip()  # Default to an empty string if no search term
 
-    # Fetch the roles
     roles = Role.query.all()
 
-    # Fetch admins (users with the 'Admin' role)
     admins = User.query.filter(User.roles.any(name='Admin')).all()
 
-    # If there's a search term, filter the users by name or email
     if search_term:
         admins = User.query.filter(
             (User.first_name.ilike(f"%{search_term}%")) |
@@ -38,7 +32,6 @@ def Users_dashboard():
             (User.email.ilike(f"%{search_term}%"))
         ).all()
 
-    # Pass the admins and their roles to the template
     return render_template("Users_dashboard.html", section=section, admins=admins, roles=roles, search_term=search_term)
 
 @admindash.route("/dashboard")
@@ -54,10 +47,6 @@ def add_role_to_user():
         user_id = request.form.get('user_id')
         role_id = request.form.get('role_id')
 
-        # Debugging output
-        print(f"Received user_id: {user_id}, role_id: {role_id}")
-
-        # Ensure both user and role exist
         user = User.query.get(user_id)
         role = Role.query.get(role_id)
 
@@ -67,11 +56,10 @@ def add_role_to_user():
             print(f"Role with ID {role_id} not found!")
 
         if user and role:
-            # Debugging output
             print(f"User: {user.first_name} {user.last_name}, Role: {role.name}")
 
-            # Clear existing roles before adding new one
-            user.roles = []  # Optional: Clear previous roles
+
+            user.roles = []
             user.roles.append(role)
             db.session.commit()
 
@@ -86,11 +74,9 @@ def add_role_to_user():
 
 @admindash.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    # Fetch the user by ID
     user = User.query.get(user_id)
 
     if user:
-        # Delete the user
         db.session.delete(user)
         db.session.commit()
         flash('User deleted successfully!', 'success')
@@ -102,46 +88,45 @@ def delete_user(user_id):
 
 @admindash.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
-    # Fetch the user from the database
+
     user = User.query.get_or_404(user_id)
 
-    # If the form is submitted via POST method
+
     if request.method == 'POST':
-        # Get the form data
+
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         email = request.form['email']
         password = request.form['password']
-        role_ids = request.form.getlist('role_ids')  # Get selected role IDs
+        role_ids = request.form.getlist('role_ids')
 
-        # Handle optional password update (Hash the password if it's being updated)
+
         if password:
-            user.set_password(password)  # Make sure to hash the password (use a method like set_password)
+            user.set_password(password)
 
-        # Update the user information
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
 
-        # Handle image upload (optional)
+
         image = request.files.get('image')
         if image:
-            user.image = image.read()  # Store the image as binary (or use a path to save it on disk)
+            user.image = image.read()
 
-        # Assign roles
-        user.roles.clear()  # Clear existing roles
+
+        user.roles.clear()
         for role_id in role_ids:
             role = Role.query.get(role_id)
             if role:
                 user.roles.append(role)
 
-        # Save the changes to the database
+
         db.session.commit()
 
         flash('User updated successfully!', 'success')
-        return redirect(url_for('admindash.Users_dashboard'))  # Redirect to users dashboard
+        return redirect(url_for('admindash.Users_dashboard'))
 
-    # Fetch all roles for the select input
+
     all_roles = Role.query.all()
 
     return render_template('edit_user.html', user=user, all_roles=all_roles)
@@ -153,37 +138,33 @@ def add_user():
         last_name = request.form['last_name']
         email = request.form['email']
         password = request.form['password']
-        role_ids = request.form.getlist('role_ids')  # Get the selected role IDs
+        role_ids = request.form.getlist('role_ids')
 
-        # Handle image upload
+
         image = request.files['image']
         image_binary = None
         if image:
-            image_binary = image.read()  # Read image as binary data
+            image_binary = image.read()
 
-        # Create new user instance
         new_user = User(
             first_name=first_name,
             last_name=last_name,
             email=email,
-            password=password,  # You should hash the password before saving
+            password=password,
             image=image_binary
         )
 
-        # Assign roles
         for role_id in role_ids:
             role = Role.query.get(role_id)
             if role:
                 new_user.roles.append(role)
 
-        # Save the user to the database
         db.session.add(new_user)
         db.session.commit()
 
         flash('User added successfully!', 'success')
-        return redirect(url_for('admindash.Users_dashboard'))  # Redirect to users dashboard
+        return redirect(url_for('admindash.Users_dashboard'))
 
-    # Retrieve all roles to populate the dropdown
     all_roles = Role.query.all()
 
     return render_template('add_user.html', all_roles=all_roles)

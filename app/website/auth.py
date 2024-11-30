@@ -55,7 +55,6 @@ def sign_up():
         else:
             default_role = Role.query.filter_by(name='User').first()
             if not default_role:
-                # Create the default role if it doesn't exist
                 default_role = Role(name='User', label='Regular User')
                 db.session.add(default_role)
                 db.session.commit()

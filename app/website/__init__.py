@@ -31,10 +31,8 @@ def create_app():
 
     from .models import User, Role
 
-    # Set up user manager (using Flask-User for authentication and role management)
     user_manager = UserManager(app, db, User)
 
-    # Function to setup roles
     def setup_roles():
         roles = ['User', 'Admin', 'Poster' , 'Doctor']
         for role_name in roles:

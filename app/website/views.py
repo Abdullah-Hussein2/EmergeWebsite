@@ -31,5 +31,5 @@ def user_profile(user_id):
 def user_image(user_id):
     user = User.query.get(user_id)
     if user and user.image:
-        return Response(user.image, mimetype='image/jpeg')  # Adjust mimetype as needed (e.g., image/png)
+        return Response(user.image, mimetype='image/jpeg')
     return "Image not found", 404

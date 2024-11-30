@@ -15,7 +15,7 @@ class User(db.Model, UserMixin):
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     description = db.Column(db.String(500))
     image = db.Column(db.LargeBinary)
-    is_active = db.Column(db.Boolean(), nullable=False, server_default='1')  # Required by Flask-User
+    is_active = db.Column(db.Boolean(), nullable=False, server_default='1')
     roles = db.relationship('Role', secondary='user_roles', backref='users')
     def has_roles(self, *role_names):
         role_names_set = set(role_names)
@@ -23,7 +23,6 @@ class User(db.Model, UserMixin):
         return bool(role_names_set & user_roles)
 
 
- # Relationship to Roles
 
 
 
@@ -32,7 +31,7 @@ class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)  # Role name
-    label = db.Column(db.String(255), nullable=True)  # For display purposes
+    label = db.Column(db.String(255), nullable=True) 
 
 
 
