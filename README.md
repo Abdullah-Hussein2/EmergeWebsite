@@ -42,4 +42,4 @@ E-download the requirements.txt file.
 
 To start the project
 
-$ python app.py
+	$ python app.py
