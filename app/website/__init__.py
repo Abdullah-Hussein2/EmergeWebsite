@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
 from flask_user import UserManager
-from flask_bcrypt import Bcrypt  # Import bcrypt for hashing passwords
+from flask_bcrypt import Bcrypt
 
 # Initialize db and bcrypt
 db = SQLAlchemy()
@@ -68,10 +68,10 @@ def create_app():
 from .models import User, Role
 
 def create_admin_user():
+
     # Check if there is already an admin user
     admin_role = Role.query.filter_by(name='Admin').first()
     if admin_role and not User.query.filter_by(email='ab@gmail.com').first():
-        # Hash password before saving
 
         # Create an admin user
         admin_user = User(

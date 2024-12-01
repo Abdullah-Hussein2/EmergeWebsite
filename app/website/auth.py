@@ -14,7 +14,7 @@ auth = Blueprint("auth", __name__)
 def login():
     if current_user.is_authenticated:
         # If the user is already logged in, redirect to the home page or dashboard
-        return redirect(url_for('views.home'))  # Replace 'views.home' with your desired route
+        return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -24,7 +24,7 @@ def login():
             if check_password_hash(user.password, password):
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
-                return redirect(url_for('views.home'))  # Redirect to home or dashboard
+                return redirect(url_for('views.home'))
             else:
                 flash('Password is incorrect.', category='error')
         else:
@@ -44,18 +44,18 @@ def sign_up():
         email = request.form.get('email')
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
-        phone_number = request.form.get('Phone_number')  # Retrieve the phone number
+        phone_number = request.form.get('Phone_number')
         password1 = request.form.get('Password1')
         password2 = request.form.get('Password2')
 
         # Input validation
         if not email or not first_name or not last_name or not phone_number or not password1 or not password2:
             flash('All fields are required.', category='error')
-        elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):  # Validate email format
+        elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             flash('Invalid email address.', category='error')
         elif len(first_name) < 2 or len(last_name) < 2:
             flash('First and last name must be at least 2 characters long.', category='error')
-        elif not re.match(r'^\d+$', phone_number):  # Validate phone number (digits only)
+        elif not re.match(r'^\d+$', phone_number):
             flash('Phone number must contain only digits.', category='error')
         elif password1 != password2:
             flash('Passwords do not match!', category='error')
@@ -70,6 +70,7 @@ def sign_up():
         elif User.query.filter_by(email=email).first():
             flash('Email is already in use.', category='error')
         else:
+
             # Create default role if it doesn't exist
             default_role = Role.query.filter_by(name='User').first()
             if not default_role:
@@ -77,12 +78,13 @@ def sign_up():
                 db.session.add(default_role)
                 db.session.commit()
 
+
             # Create new user
             new_user = User(
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
-                phone_number=phone_number,  # Save phone number
+                phone_number=phone_number,
                 is_active=True,
                 password=generate_password_hash(password1)
             )
@@ -98,6 +100,8 @@ def sign_up():
             return redirect(url_for('views.home'))  # Redirect to home or dashboard
 
     return render_template("signup.html", user=current_user)
+
+
 
 # Logout route
 @auth.route("/logout")

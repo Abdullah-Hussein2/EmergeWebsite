@@ -6,7 +6,7 @@ from . import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import SQLAlchemyError
 
-# Blueprint definition
+
 admindash = Blueprint("admindash", __name__)
 
 # Users Dashboard
@@ -15,6 +15,7 @@ admindash = Blueprint("admindash", __name__)
 @roles_required('Admin')
 def Users_dashboard():
     roles = Role.query.all()  # Get all roles to display in tabs
+
     # Add logic to fetch users based on their roles
     for role in roles:
         role.users = User.query.filter(User.roles.any(id=role.id)).all()
@@ -65,6 +66,7 @@ def edit_user(user_id):
     user = User.query.get_or_404(user_id)  # Get the user by ID
 
     if request.method == 'POST':
+
         # Update basic user details
         user.first_name = request.form['first_name']
         user.last_name = request.form['last_name']
@@ -86,7 +88,7 @@ def edit_user(user_id):
             else:
                 user.password = generate_password_hash(new_password)  # Hash and update password
 
-        # Handle image upload (optional)
+        # Handle image upload
         image = request.files['image']
         if image:
             user.image = image.read()
@@ -156,6 +158,7 @@ def view_user(user_id):
 
 @admindash.route('/Anlytics')
 def Anlytics():
+
 # Query total users
     total_users_count = User.query.count()
 
@@ -166,7 +169,9 @@ def Anlytics():
     roles_data = []
     roles = Role.query.all()
     for role in roles:
+
         # Directly use len() on the InstrumentedList
+
         role_user_count = len(role.users)  # Get the length of the InstrumentedList
         roles_data.append({
             "name": role.name,
