@@ -1,15 +1,19 @@
-from flask import Blueprint, render_template , redirect , url_for, flash , Response
+from flask import Blueprint, render_template , redirect , url_for, flash , Response , request
 from flask_login import login_required , current_user
 from .models import User, Role
 from flask_user import roles_required
 from . import db
 
+
+# the blueprint
 admindash = Blueprint("admindash", __name__)
 
-from flask import render_template, request, redirect, url_for, flash
-from . import db
-from .models import User, Role
-from flask_login import login_required
+
+
+
+
+
+#Users dash shows all the names of the users and admin and other roles
 
 @admindash.route('/Users_dashboard', methods=['GET', 'POST'])
 def Users_dashboard():
@@ -34,11 +38,23 @@ def Users_dashboard():
 
     return render_template("Users_dashboard.html", section=section, admins=admins, roles=roles, search_term=search_term)
 
+
+
+
+
+#TODO
+
 @admindash.route("/dashboard")
 def dashboard():
     total_users = User.query.count()
     return render_template("dashboard.html", total_user=total_users)
 
+
+
+
+
+
+#Adding roles to useres (NOTE:defulte role is 'user')
 
 
 @admindash.route('/add_role_to_user', methods=['POST'])
@@ -72,6 +88,8 @@ def add_role_to_user():
 
 
 
+
+#deleting users
 @admindash.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -86,6 +104,11 @@ def delete_user(user_id):
     return redirect(url_for('admindash.Users_dashboard'))
 
 
+
+
+
+
+#editing the information of the users
 @admindash.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
 
@@ -131,6 +154,11 @@ def edit_user(user_id):
 
     return render_template('edit_user.html', user=user, all_roles=all_roles)
 
+
+
+
+
+#adding a user
 @admindash.route('/add_user', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':
@@ -170,6 +198,12 @@ def add_user():
     return render_template('add_user.html', all_roles=all_roles)
 
 
+
+
+# Display Image in a Template html code => <img src="{{ url_for('admindash.view_user', user_id=user.id) }}" alt="User Image">
+
+
+#showing user profiles
 @admindash.route('/view_user/<int:user_id>', methods=['GET'])
 def view_user(user_id):
     user = User.query.get_or_404(user_id)
@@ -180,6 +214,20 @@ def view_user(user_id):
     else:
         return "No image available", 404
 
-# <img src="{{ url_for('admindash.view_user', user_id=user.id) }}" alt="User Image"> Display Image in a Template
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}

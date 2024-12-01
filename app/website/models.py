@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 
 
 
-
+#making the db tabals (DO NOT CHANGE WITH OUT CONTACTING "ABDULLAH")
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -16,7 +16,17 @@ class User(db.Model, UserMixin):
     description = db.Column(db.String(500))
     image = db.Column(db.LargeBinary)
     is_active = db.Column(db.Boolean(), nullable=False, server_default='1')
+
+
+    #relationship between the tables (users tables and roles tables)
     roles = db.relationship('Role', secondary='user_roles', backref='users')
+
+
+
+
+
+
+    # checking if user has role (NOTE: every user will have a role on regestiring)
     def has_roles(self, *role_names):
         role_names_set = set(role_names)
         user_roles = {role.name for role in self.roles}
@@ -27,11 +37,17 @@ class User(db.Model, UserMixin):
 
 
 
+
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)  # Role name
-    label = db.Column(db.String(255), nullable=True) 
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    label = db.Column(db.String(255), nullable=True)
+
+
+
+
+
 
 
 

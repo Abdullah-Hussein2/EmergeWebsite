@@ -18,6 +18,9 @@ def home():
 def posts():
     return render_template("posts.html" ,user=current_user)
 
+
+
+
 @views.route('/profile/<int:user_id>')
 def user_profile(user_id):
     user = User.query.get(user_id)  # Fetch user data by user_id
@@ -25,6 +28,9 @@ def user_profile(user_id):
         return render_template('user_profile.html', user=user)
     else:
         return "User not found", 404
+
+
+
 
 # Route to serve user image from database
 @views.route('/user_image/<int:user_id>')

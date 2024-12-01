@@ -10,10 +10,10 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
 
-    # Configuration
+    # Configuration of the app
     app.config['SECRET_KEY'] = "helloworld"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
-    app.config['USER_ENABLE_EMAIL'] = False  # Disable email if not needed
+    app.config['USER_ENABLE_EMAIL'] = False
     app.config['USER_APP_NAME'] = 'Emarge'  # Change app name as needed
 
     # Initialize extensions
@@ -31,7 +31,12 @@ def create_app():
 
     from .models import User, Role
 
+
+    # Initialize user_manager
+
     user_manager = UserManager(app, db, User)
+
+    # adding the roles
 
     def setup_roles():
         roles = ['User', 'Admin', 'Poster' , 'Doctor']
@@ -41,10 +46,13 @@ def create_app():
                 db.session.add(new_role)
         db.session.commit()
 
+
     with app.app_context():
         # Ensure roles are set up and tables are created
         db.create_all()  # Create tables (if they don't exist)
         setup_roles()    # Add default roles if they don't exist
+
+
 
     # Initialize LoginManager
     login_manager = LoginManager()
