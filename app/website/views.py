@@ -39,3 +39,12 @@ def user_image(user_id):
     if user and user.image:
         return Response(user.image, mimetype='image/jpeg')
     return "Image not found", 404
+
+
+
+
+@views.route('/services')
+@login_required
+@roles_required('Admin')
+def services():
+    return render_template('services.html')

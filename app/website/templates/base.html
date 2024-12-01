@@ -22,17 +22,17 @@
             <ul>
                 <li><a href="/" class="link active">Home</a></li>
                 <li><a href="/" class="link">Blog</a></li>
-                <li><a href="/" class="link">Services</a></li>
+                <li><a href="/services" class="link">Services</a></li>
                 <li><a href="/" class="link">About</a></li>
-                <li><a href="/" class="link">About</a></li>
-                <li><a href="/" class="link">About</a></li>
-                <li><a href="/posts" class="link">About</a></li>
-                <li><a href="/login" class="link">About</a></li>
-                <li><a href="/signup" class="link">About</a></li>
+                <li><a href="/Users_dashboard" class="link">users_dashboard</a></li>
+                <li><a href="/posts" class="link">posts</a></li>
+                <li><a href="/logout" class="link">logout</a></li>
+                <li><a href="/login" class="link">login</a></li>
+                <li><a href="/signup" class="link">signup</a></li>
             </ul>
         </div>
         <div class="nav-button">
-            {% if user.is_authenticated %}
+            {% if current_user.is_authenticated %}
             <button href="/Logout" class="btn white-btn" >Logout</button>
             {% else %}
             <button href="/login" class="btn white-btn" >Sign In</button>

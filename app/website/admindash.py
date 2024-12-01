@@ -16,6 +16,7 @@ admindash = Blueprint("admindash", __name__)
 #Users dash shows all the names of the users and admin and other roles
 
 @admindash.route('/Users_dashboard', methods=['GET', 'POST'])
+@roles_required('Admin')
 def Users_dashboard():
     if 'Admin' not in [role.name for role in current_user.roles]:
         flash('You do not have permission to access this page.', 'danger')
