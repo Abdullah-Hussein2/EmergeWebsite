@@ -8,6 +8,7 @@ Instlation:
  B-vs code
 
  -Steps
+
 A-clone the repo using git
 	-git clone https://github.com/Abdullah-Hussein2/Emerge_projectcs50x.git
 
