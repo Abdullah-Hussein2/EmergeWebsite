@@ -33,7 +33,7 @@ D-Activate the vitrenv in git bash
 	source venv/Scripts/Activate
 
  
-D-download the requirements.txt file
+E-download the requirements.txt file
 	
  	pip install -r requirements.txt
 
