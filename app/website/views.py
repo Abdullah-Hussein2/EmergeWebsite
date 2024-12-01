@@ -48,3 +48,7 @@ def user_image(user_id):
 @roles_required('Admin')
 def services():
     return render_template('services.html')
+
+
+
+

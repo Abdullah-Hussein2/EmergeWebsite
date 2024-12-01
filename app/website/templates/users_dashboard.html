@@ -1,356 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* General Styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+        /* Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
         }
 
-        .dashboard-container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 30px;
-        }
-
-        .dashboard-title {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .welcome-message {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            color: #555;
-        }
-
-        /* Tabs */
-        .tabs {
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            border: 1px solid #ddd;
-            background-color: #f1f1f1;
-            border-radius: 5px;
-        }
-
-        .active-tab {
-            background-color: #007bff;
+        .sidebar .nav-link {
             color: white;
         }
 
-        /* Tab Content */
-        .tab-content {
-            display: none;
+        .sidebar .nav-link:hover {
+            background-color: #495057;
         }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .user-table th, .user-table td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        .user-table th {
-            background-color: #f4f4f4;
-            font-weight: bold;
-        }
-
-        .user-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
         }
 
         .role-badge {
             display: inline-block;
             padding: 5px 10px;
-            background-color: #007bff;
             color: white;
             border-radius: 4px;
             margin: 2px 0;
         }
 
-        .delete-button {
-            padding: 5px 10px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        .role-badge.user {
+            background-color: #6c757d;
         }
 
-        .delete-button:hover {
-            background-color: #e53935;
+        .role-badge.admin {
+            background-color: #007bff;
         }
 
-        .role-select {
-            padding: 8px;
-            margin-right: 10px;
-            font-size: 1rem;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+        .role-badge.poster {
+            background-color: #28a745;
         }
 
-        .assign-button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
+        .role-badge.doctor {
+            background-color: #17a2b8;
         }
 
-        .edit-button {
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .edit-button:hover {
-            background-color: #45a049;
-        }
-
-        /* Edit Form */
-        .edit-form {
+        .tabs-container {
             margin-top: 20px;
         }
-
-        .edit-form input, .edit-form select {
-            padding: 8px;
-            margin: 10px 0;
-            width: 100%;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        .save-button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-        }
-
-        .cancel-button {
-            padding: 10px 15px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-        }
-
-        .add-user-button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .add-user-button:hover {
-            background-color: #45a049;
-        }
-
-        #addUserForm {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-
-        #addUserForm input, #addUserForm textarea {
-            width: 100%;
-            padding: 8px;
-            margin: 10px 0;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        #addUserForm button {
-            margin-top: 10px;
-        }
-
-        #addUserForm button.cancel-button {
-            background-color: #f44336;
-        }
-
     </style>
 </head>
+
 <body>
 
-<div class="dashboard-container">
-    <h1 class="dashboard-title">Admin Dashboard</h1>
-    <p class="welcome-message">Welcome, {{ current_user.first_name }} {{ current_user.last_name }}!</p>
-
-    <!-- Add User Button -->
-    < <a href="{{ url_for('admindash.add_user') }}">
-        <button class="add-user-button">Add New User</button>
-    </a>
-
-    <!-- Add User Form -->
-    <div id="addUserForm">
-        <h3>Add New User</h3>
-        <form action="{{ url_for('admindash.add_user') }}" method="POST" enctype="multipart/form-data">
-            <input type="text" name="first_name" placeholder="First Name" required><br>
-            <input type="text" name="last_name" placeholder="Last Name" required><br>
-            <input type="email" name="email" placeholder="Email" required><br>
-            <textarea name="description" placeholder="Description"></textarea><br>
-
-            <label for="role">Assign Role</label>
-            <select name="role_id" class="role-select" required>
-                {% for role in roles %}
-                    <option value="{{ role.id }}">{{ role.name }}</option>
-                {% endfor %}
-            </select><br>
-
-            <label for="image">Upload Image</label>
-            <input type="file" name="image" accept="image/*"><br>
-
-            <button type="submit" class="save-button">Add User</button>
-            <button type="button" class="cancel-button" onclick="toggleAddUserForm()">Cancel</button>
-        </form>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2 class="text-center text-white">Admin Panel</h2>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="home">Home page</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="Anlytics">Anlytics</a>
+            </li>
+        </ul>
     </div>
 
-    <!-- Tabs for Role Sections -->
-    <div class="tabs">
-        {% for role in roles %}
-        <button class="tab {% if loop.index == 1 %}active-tab{% endif %}" onclick="showTab('{{ role.name }}')">{{ role.name }}</button>
-        {% endfor %}
-    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Welcome, {{ current_user.first_name }} {{ current_user.last_name }}!</h1>
+            <a href="{{ url_for('admindash.add_user') }}" class="btn btn-success">Add New User</a>
+        </div>
 
-    <!-- Tab Content Sections -->
-    {% for role in roles %}
-    <div id="{{ role.name }}" class="tab-content {% if loop.index == 1 %}active{% endif %}">
-        <h3>{{ role.name }} Users</h3>
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Roles</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in role.users %}
-                <tr>
-                    <td>{{ user.id }}</td> <!-- Display User ID -->
-                    <td>{{ user.first_name }}</td>
-                    <td>{{ user.last_name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        {% if user.roles %}
-                            {% for role in user.roles %}
-                                <span class="role-badge">{{ role.name }}</span><br>
-                            {% endfor %}
-                        {% else %}
-                            <span>No role assigned</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <!-- Form to Change Role -->
-                        <form action="{{ url_for('admindash.add_role_to_user') }}" method="POST" style="display:inline;">
-                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                            <select name="role_id" class="role-select" required>
-                                {% for role in roles %}
-                                    <option value="{{ role.id }}" {% if role in user.roles %}selected{% endif %}>{{ role.name }}</option>
+        <!-- Tabs for Roles -->
+        <ul class="nav nav-tabs" id="roleTabs" role="tablist">
+            {% for role in roles %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.index == 1 %}active{% endif %}" id="{{ role.name }}-tab" data-bs-toggle="tab" data-bs-target="#{{ role.name }}" type="button" role="tab" aria-controls="{{ role.name }}" aria-selected="{{ 'true' if loop.index == 1 else 'false' }}">
+                    {{ role.name }}
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="tab-content tabs-container">
+            {% for role in roles %}
+            <div class="tab-pane fade {% if loop.index == 1 %}show active{% endif %}" id="{{ role.name }}" role="tabpanel" aria-labelledby="{{ role.name }}-tab">
+                <h3 class="mt-3">{{ role.name }} Users</h3>
+
+                <!-- Search Bar -->
+                <div class="mb-3">
+                    <input type="text" id="search-{{ role.name }}" class="form-control" placeholder="Search users..." onkeyup="searchUser('{{ role.name }}')" />
+                </div>
+
+                <!-- Table for Role -->
+                <table class="table table-bordered table-striped mt-3" id="user-table-{{ role.name }}">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Roles</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in role.users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.last_name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone_number or 'N/A' }}</td>
+                            <td>
+                                {% for r in user.roles %}
+                                <span class="role-badge {{ r.name|lower }}">{{ r.name }}</span>
                                 {% endfor %}
-                            </select>
-                            <button type="submit" class="assign-button">Change Role</button>
-                        </form>
-
-                        <!-- Form to Edit User Info -->
-                        <form action="{{ url_for('admindash.edit_user', user_id=user.id) }}" method="GET" style="display:inline;">
-                            <button type="submit" class="edit-button">Edit Info</button>
-                        </form>
-
-                        <!-- Form to Delete User -->
-                        <form action="{{ url_for('admindash.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
-                            <button type="submit" class="delete-button">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admindash.edit_user', user_id=user.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ url_for('admindash.delete_user', user_id=user.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    {% endfor %}
 
-    <!-- Edit User Form Section (Triggered by Edit Button) -->
-    {% if user_to_edit %}
-    <div class="edit-form">
-        <h3>Edit User Info</h3>
-        <form action="{{ url_for('admindash.save_edited_user', user_id=user_to_edit.id) }}" method="POST">
-            <input type="text" name="first_name" value="{{ user_to_edit.first_name }}" placeholder="First Name" required>
-            <input type="text" name="last_name" value="{{ user_to_edit.last_name }}" placeholder="Last Name" required>
-            <input type="email" name="email" value="{{ user_to_edit.email }}" placeholder="Email" required>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-            <select name="role_id" class="role-select" required>
-                {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role in user_to_edit.roles %}selected{% endif %}>{{ role.name }}</option>
-                {% endfor %}
-            </select>
+    <script>
+        function searchUser(roleName) {
+            const searchInput = document.getElementById('search-' + roleName);
+            const table = document.getElementById('user-table-' + roleName);
+            const rows = table.getElementsByTagName('tr');
+            const searchTerm = searchInput.value.toLowerCase();
 
-            <button type="submit" class="save-button">Save Changes</button>
-            <a href="{{ url_for('admindash.dashboard') }}" class="cancel-button">Cancel</a>
-        </form>
-    </div>
-    {% endif %}
-</div>
-
-<script>
-    // Function to show the clicked tab's content
-    function showTab(roleName) {
-        var tabs = document.querySelectorAll('.tab-content');
-        tabs.forEach(function(tab) {
-            tab.classList.remove('active');
-        });
-
-        var tabButtons = document.querySelectorAll('.tab');
-        tabButtons.forEach(function(button) {
-            button.classList.remove('active-tab');
-        });
-
-        document.getElementById(roleName).classList.add('active');
-        var clickedTab = document.querySelector('.tab[onclick="showTab(\'' + roleName + '\')"]');
-        clickedTab.classList.add('active-tab');
-    }
-
-    // Toggle Add User Form Visibility
-    function toggleAddUserForm() {
-        var form = document.getElementById('addUserForm');
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-</script>
-
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let rowText = '';
+                for (let j = 0; j < cells.length; j++) {
+                    rowText += cells[j].innerText.toLowerCase() + ' ';
+                }
+                row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+            }
+        }
+    </script>
 </body>
+
 </html>

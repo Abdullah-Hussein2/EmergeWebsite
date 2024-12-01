@@ -4,113 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit User</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        .form-container {
-            width: 50%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 50px;
-        }
-
-        .form-container h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        label {
-            font-size: 1rem;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        input[type="text"], input[type="email"], input[type="password"], input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        select {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .cancel-button {
-            background-color: #f44336;
-        }
-
-        .cancel-button:hover {
-            background-color: #e53935;
-        }
-    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-<div class="form-container">
-    <h2>Edit User Details</h2>
-    <form action="{{ url_for('admindash.edit_user', user_id=user.id) }}" method="POST" enctype="multipart/form-data">
-        <!-- User First Name -->
-        <label for="first_name">First Name:</label>
-        <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header">
+            <h2 class="text-center">Edit User Details</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="text" name="phone_number" class="form-control" value="{{ user.phone_number }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3">{{ user.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="roles" class="form-label">Roles</label>
+                    <select name="role_ids" class="form-select" multiple>
+                        {% for role in roles %}
+                            <option value="{{ role.id }}" {% if role in user.roles %}selected{% endif %}>{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <!-- User Last Name -->
-        <label for="last_name">Last Name:</label>
-        <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                <div class="mb-3">
+                    <label for="image" class="form-label">Profile Image</label>
+                    <input type="file" name="image" class="form-control">
+                </div>
 
-        <!-- User Email -->
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{ user.email }}" required>
-
-        <!-- User Password -->
-        <label for="password">New Password (Leave blank if not changing):</label>
-        <input type="password" id="password" name="password">
-
-        <!-- User Role -->
-        <label for="roles">Assign Roles:</label>
-        <select id="roles" name="role_ids" multiple required>
-            {% for role in all_roles %}
-                <option value="{{ role.id }}" {% if role in user.roles %}selected{% endif %}>{{ role.name }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- User Image Upload (Optional) -->
-        <label for="image">Upload Profile Image:</label>
-        <input type="file" id="image" name="image" accept="image/*">
-
-        <button type="submit">Save Changes</button>
-        <a href="{{ url_for('admindash.Users_dashboard') }}">
-            <button type="button" class="cancel-button">Cancel</button>
-        </a>
-    </form>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+            <a href="{{ url_for('admindash.Users_dashboard') }}" class="btn btn-danger mt-3 w-100">Cancel</a>
+        </div>
+    </div>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

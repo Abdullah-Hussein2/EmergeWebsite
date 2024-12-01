@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="static/style.css">
+    <script>
+        // Function to handle button clicks and navigate to a specific URL
+        function navigateTo(url) {
+            window.location.href = url; // Redirect to the specified URL
+        }
+    </script>
     <title>
         {% block title %}
 
@@ -33,10 +39,10 @@
         </div>
         <div class="nav-button">
             {% if current_user.is_authenticated %}
-            <button href="/Logout" class="btn white-btn" >Logout</button>
+                <button class="btn white-btn" onclick="navigateTo('/logout')">Logout</button>
             {% else %}
-            <button href="/login" class="btn white-btn" >Sign In</button>
-            <button href="/signup" class="btn white-btn" >Sign Up</button>
+                <button class="btn white-btn" onclick="navigateTo('/login')">Sign In</button>
+                <button class="btn white-btn" onclick="navigateTo('/signup')">Sign Up</button>
             {% endif %}
         </div>
     </nav>
@@ -46,6 +52,8 @@
 
         {% endif %} {% endfor %} {% endif %} {% endwith %}
     {% block content %}
+
+
 
     {% endblock content %}
 </body>

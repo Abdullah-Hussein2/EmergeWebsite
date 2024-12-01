@@ -1,165 +1,98 @@
-from flask import Blueprint, render_template , redirect , url_for, flash , Response , request
-from flask_login import login_required , current_user
+from flask import Blueprint, render_template, redirect, url_for, flash, request, Response
+from flask_login import login_required, current_user
 from .models import User, Role
-from flask_user import roles_required
 from . import db
+from werkzeug.security import generate_password_hash
+from sqlalchemy.exc import SQLAlchemyError
 
-
-# the blueprint
+# Blueprint definition
 admindash = Blueprint("admindash", __name__)
 
-
-
-
-
-
-#Users dash shows all the names of the users and admin and other roles
-
+# Users Dashboard
 @admindash.route('/Users_dashboard', methods=['GET', 'POST'])
-@roles_required('Admin')
 def Users_dashboard():
     if 'Admin' not in [role.name for role in current_user.roles]:
         flash('You do not have permission to access this page.', 'danger')
         return redirect(url_for('views.home'))
 
-    section = request.args.get('section', 'overview')
+    roles = Role.query.all()  # Get all roles to display in tabs
+    # Add logic to fetch users based on their roles
+    for role in roles:
+        role.users = User.query.filter(User.roles.any(id=role.id)).all()
 
-    search_term = request.args.get('search', '').strip()  # Default to an empty string if no search term
+    return render_template("Users_dashboard.html", roles=roles, current_user=current_user)
 
-    roles = Role.query.all()
-
-    admins = User.query.filter(User.roles.any(name='Admin')).all()
-
-    if search_term:
-        admins = User.query.filter(
-            (User.first_name.ilike(f"%{search_term}%")) |
-            (User.last_name.ilike(f"%{search_term}%")) |
-            (User.email.ilike(f"%{search_term}%"))
-        ).all()
-
-    return render_template("Users_dashboard.html", section=section, admins=admins, roles=roles, search_term=search_term)
-
-
-
-
-
-#TODO
-
-@admindash.route("/dashboard")
-def dashboard():
-    total_users = User.query.count()
-    return render_template("dashboard.html", total_user=total_users)
-
-
-
-
-
-
-#Adding roles to useres (NOTE:defulte role is 'user')
-
-
+# Add Role to User
 @admindash.route('/add_role_to_user', methods=['POST'])
 def add_role_to_user():
-    if request.method == 'POST':
-        user_id = request.form.get('user_id')
-        role_id = request.form.get('role_id')
+    user_id = request.form.get('user_id')
+    role_id = request.form.get('role_id')
 
-        user = User.query.get(user_id)
-        role = Role.query.get(role_id)
+    user = User.query.get(user_id)
+    role = Role.query.get(role_id)
 
-        if not user:
-            print(f"User with ID {user_id} not found!")
-        if not role:
-            print(f"Role with ID {role_id} not found!")
-
-        if user and role:
-            print(f"User: {user.first_name} {user.last_name}, Role: {role.name}")
-
-
-            user.roles = []
-            user.roles.append(role)
-            db.session.commit()
-
-            flash('Role assigned successfully!', 'success')
-        else:
-            print(f"Invalid user or role. User: {user}, Role: {role}")
-            flash('Invalid user or role!', 'danger')
+    if not user or not role:
+        flash("User or Role not found!", "danger")
+    else:
+        # Update user roles
+        user.roles = [role]
+        db.session.commit()
+        flash("Role assigned successfully!", "success")
 
     return redirect(url_for('admindash.Users_dashboard'))
 
-
-
-
-#deleting users
+# Delete User
 @admindash.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
     user = User.query.get(user_id)
 
     if user:
-        db.session.delete(user)
-        db.session.commit()
-        flash('User deleted successfully!', 'success')
+        try:
+            db.session.delete(user)  # Delete the user
+            db.session.commit()
+            flash('User deleted successfully!', 'success')
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash('An error occurred while deleting the user.', 'danger')
     else:
         flash('User not found!', 'danger')
 
     return redirect(url_for('admindash.Users_dashboard'))
 
-
-
-
-
-
-#editing the information of the users
-@admindash.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+# Edit User
+@admindash.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
+@login_required
 def edit_user(user_id):
-
-    user = User.query.get_or_404(user_id)
-
+    user = User.query.get_or_404(user_id)  # Get the user by ID
 
     if request.method == 'POST':
+        user.first_name = request.form['first_name']
+        user.last_name = request.form['last_name']
+        user.email = request.form['email']
+        user.phone_number = request.form['phone_number']
+        user.description = request.form['description']  # Update description
 
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        email = request.form['email']
-        password = request.form['password']
-        role_ids = request.form.getlist('role_ids')
+        # Handle roles
+        role_ids = request.form.getlist('role_ids')  # Get the selected roles
+        new_roles = Role.query.filter(Role.id.in_(role_ids)).all()  # Fetch roles based on selected IDs
+        user.roles = new_roles  # Update user's roles
 
-
-        if password:
-            user.set_password(password)
-
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
-
-
-        image = request.files.get('image')
+        # Handle image upload (optional)
+        image = request.files['image']
         if image:
             user.image = image.read()
 
+        try:
+            db.session.commit()  # Commit changes to the database
+            flash('User updated successfully!', 'success')
+            return redirect(url_for('admindash.Users_dashboard'))
+        except SQLAlchemyError:
+            db.session.rollback()  # Rollback if there is an error
+            flash('An error occurred while updating the user.', 'danger')
 
-        user.roles.clear()
-        for role_id in role_ids:
-            role = Role.query.get(role_id)
-            if role:
-                user.roles.append(role)
+    return render_template('edit_user.html', user=user, roles=Role.query.all())
 
-
-        db.session.commit()
-
-        flash('User updated successfully!', 'success')
-        return redirect(url_for('admindash.Users_dashboard'))
-
-
-    all_roles = Role.query.all()
-
-    return render_template('edit_user.html', user=user, all_roles=all_roles)
-
-
-
-
-
-#adding a user
+# Add User
 @admindash.route('/add_user', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':
@@ -167,27 +100,31 @@ def add_user():
         last_name = request.form['last_name']
         email = request.form['email']
         password = request.form['password']
+        phone_number = request.form['phone_number']  # Capturing phone number
+        description = request.form['description']
         role_ids = request.form.getlist('role_ids')
 
-
         image = request.files['image']
-        image_binary = None
-        if image:
-            image_binary = image.read()
+        image_binary = image.read() if image else None
 
+        # Create a new user object
         new_user = User(
             first_name=first_name,
             last_name=last_name,
             email=email,
-            password=password,
+            password=generate_password_hash(password),
+            phone_number=phone_number,  # Assigning phone number
+            description=description,
             image=image_binary
         )
 
+        # Add selected roles to the user
         for role_id in role_ids:
             role = Role.query.get(role_id)
             if role:
                 new_user.roles.append(role)
 
+        # Add the user to the database
         db.session.add(new_user)
         db.session.commit()
 
@@ -195,40 +132,42 @@ def add_user():
         return redirect(url_for('admindash.Users_dashboard'))
 
     all_roles = Role.query.all()
-
     return render_template('add_user.html', all_roles=all_roles)
 
-
-
-
-# Display Image in a Template html code => <img src="{{ url_for('admindash.view_user', user_id=user.id) }}" alt="User Image">
-
-
-#showing user profiles
+# Display User Profile Image
 @admindash.route('/view_user/<int:user_id>', methods=['GET'])
 def view_user(user_id):
     user = User.query.get_or_404(user_id)
-
-    # Return the image as a response in a format that the browser can display
     if user.image:
-        return Response(user.image, mimetype='image/jpeg')  # Or image/png, depending on your image format
-    else:
-        return "No image available", 404
+        return Response(user.image, mimetype='image/jpeg')
+    return "No image available", 404
 
 
 
 
+@admindash.route('/Anlytics')
+def Anlytics():
+# Query total users
+    total_users_count = User.query.count()
 
+    # Query active users
+    active_users_count = User.query.filter_by(is_active=True).count()
 
+    # Query roles and user counts for each role
+    roles_data = []
+    roles = Role.query.all()
+    for role in roles:
+        # Directly use len() on the InstrumentedList
+        role_user_count = len(role.users)  # Get the length of the InstrumentedList
+        roles_data.append({
+            "name": role.name,
+            "count": role_user_count
+        })
 
-
-
-
-
-
-
-
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+    # Pass data to the template
+    return render_template(
+        'Anlytics.html',
+        total_users_count=total_users_count,
+        active_users_count=active_users_count,
+        roles_data=roles_data
+    )

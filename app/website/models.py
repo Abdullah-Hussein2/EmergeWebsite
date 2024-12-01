@@ -16,12 +16,11 @@ class User(db.Model, UserMixin):
     description = db.Column(db.String(500))
     image = db.Column(db.LargeBinary)
     is_active = db.Column(db.Boolean(), nullable=False, server_default='1')
+    phone_number = db.Column(db.String(15), nullable=True)
 
 
     #relationship between the tables (users tables and roles tables)
-    roles = db.relationship('Role', secondary='user_roles', backref='users')
-
-
+    roles = db.relationship('Role', secondary='user_roles', backref='users', lazy='dynamic', passive_deletes=True)
 
 
 
@@ -31,10 +30,6 @@ class User(db.Model, UserMixin):
         role_names_set = set(role_names)
         user_roles = {role.name for role in self.roles}
         return bool(role_names_set & user_roles)
-
-
-
-
 
 
 

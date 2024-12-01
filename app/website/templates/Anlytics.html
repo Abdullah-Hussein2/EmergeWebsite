@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Analytics Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #495057;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2 class="text-center text-white">Admin Panel</h2>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="/home">home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/Users_dashboard">Users</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Header -->
+        <h1>User Analytics</h1>
+        <p class="text-muted">Overview of user activity</p>
+
+        <!-- Analytics Cards -->
+        <div class="row">
+            <!-- Total Active Users -->
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h3 class="card-title">Active Users</h3>
+                        <h2>{{ active_users_count }}</h2>
+                        <p class="card-text">Users currently active in the system</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Users -->
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h3 class="card-title">Total Users</h3>
+                        <h2>{{ total_users_count }}</h2>
+                        <p class="card-text">Total registered users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Analytics -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Users Per Role</h3>
+                        <div class="chart-container">
+                            <canvas id="roleChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Data from the server
+        const rolesData = {{ roles_data | safe }};
+        const roleLabels = rolesData.map(role => role.name);
+        const roleCounts = rolesData.map(role => role.count);
+
+        // Render the chart
+        const ctx = document.getElementById('roleChart').getContext('2d');
+        const roleChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: roleLabels,
+                datasets: [{
+                    label: 'Users per Role',
+                    data: roleCounts,
+                    backgroundColor: [
+                        '#007bff',
+                        '#6c757d',
+                        '#28a745',
+                        '#17a2b8',
+                        '#ffc107'
+                    ],
+                    borderColor: [
+                        '#0056b3',
+                        '#495057',
+                        '#19692c',
+                        '#117a8b',
+                        '#e0a800'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
