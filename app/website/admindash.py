@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, Response
 from flask_login import login_required, current_user
+from flask_user import roles_required
 from .models import User, Role
 from . import db
 from werkzeug.security import generate_password_hash
@@ -10,11 +11,9 @@ admindash = Blueprint("admindash", __name__)
 
 # Users Dashboard
 @admindash.route('/Users_dashboard', methods=['GET', 'POST'])
+@login_required
+@roles_required('Admin')
 def Users_dashboard():
-    if 'Admin' not in [role.name for role in current_user.roles]:
-        flash('You do not have permission to access this page.', 'danger')
-        return redirect(url_for('views.home'))
-
     roles = Role.query.all()  # Get all roles to display in tabs
     # Add logic to fetch users based on their roles
     for role in roles:
@@ -66,6 +65,7 @@ def edit_user(user_id):
     user = User.query.get_or_404(user_id)  # Get the user by ID
 
     if request.method == 'POST':
+        # Update basic user details
         user.first_name = request.form['first_name']
         user.last_name = request.form['last_name']
         user.email = request.form['email']
@@ -76,6 +76,15 @@ def edit_user(user_id):
         role_ids = request.form.getlist('role_ids')  # Get the selected roles
         new_roles = Role.query.filter(Role.id.in_(role_ids)).all()  # Fetch roles based on selected IDs
         user.roles = new_roles  # Update user's roles
+
+        # Handle password update (optional)
+        new_password = request.form.get('password')  # Get the new password from the form
+        if new_password:  # Check if the password field is not empty
+            if len(new_password) < 6:
+                flash('Password must be at least 6 characters long.', 'danger')
+                return render_template('edit_user.html', user=user, roles=Role.query.all())
+            else:
+                user.password = generate_password_hash(new_password)  # Hash and update password
 
         # Handle image upload (optional)
         image = request.files['image']

@@ -4,46 +4,175 @@
 {% endblock title %}
 
 {% block content %}
-<form method="POST">
-    <div class="form-box" style="overflow-y:scroll;">
-        <div class="login-container" id="login">
-            <div class="top">
-                <span>Do you have an account? <a href="login">Login</a></span>
-                <header>Register</header>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-4 rounded-4" style="max-width: 500px; width: 100%;">
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-primary">Register</h3>
+                <p class="text-muted">Already have an account? <a href="login" class="text-primary">Login</a></p>
             </div>
-            <div class="input-box">
-                <input type="text" class="input-field" placeholder="Enter first name" name="first_name" id="first_name" required >
-                <i class="bx bx-user"></i>
-            </div>
-            <div class="input-box">
-                <input type="text" class="input-field" placeholder="Enter last name" name="last_name" id="last_name" required >
-                <i class="bx bx-user"></i>
-            </div>
-            <div class="input-box">
-                <input type="email" class="input-field" placeholder="Enter Email" name="email" id="email" required >
-                <i class="bx bx-user"></i>
-            </div>
-            <div class="input-box">
-                <input type="password" class="input-field" placeholder="Enter Password" name="Password1" id="Password1" required >
-                <i class="bx bx-lock-alt"></i>
-            </div>
-            <div class="input-box">
-                <input type="password" class="input-field" placeholder="confirm Password" name="Password2" id="Password2" required >
-                <i class="bx bx-lock-alt"></i>
-            </div>
-            <div class="input-box">
-                <input type="submit" class="submit" value="Sign Up">
-            </div>
-            <div class="two-col">
-                <div class="two">
-                    <label><a href="#">Contact us</a></label>
+            <form method="POST" onsubmit="return validateForm()">
+                <!-- First Name -->
+                <div class="mb-3">
+                    <label for="first_name" class="form-label fw-semibold">First Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bx bx-user text-primary"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Enter First Name" name="first_name" id="first_name" value="{{ request.form.get('first_name', '') }}" required>
+                    </div>
+                    <small id="first_name-error" class="form-text text-danger" style="display: none;">First name is required.</small>
                 </div>
-                <div class="two">
-                    <label><a href="#">Need Help?</a></label>
+
+                <!-- Last Name -->
+                <div class="mb-3">
+                    <label for="last_name" class="form-label fw-semibold">Last Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bx bx-user text-primary"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Enter Last Name" name="last_name" id="last_name" value="{{ request.form.get('last_name', '') }}" required>
+                    </div>
+                    <small id="last_name-error" class="form-text text-danger" style="display: none;">Last name is required.</small>
                 </div>
-            </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bx bx-envelope text-primary"></i>
+                        </span>
+                        <input type="email" class="form-control" placeholder="Enter Email" name="email" id="email" value="{{ request.form.get('email', '') }}" required>
+                    </div>
+                    <small id="email-error" class="form-text text-danger" style="display: none;">Please enter a valid email address.</small>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="mb-3">
+                    <label for="Phone_number" class="form-label fw-semibold">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bx bx-phone text-primary"></i>
+                        </span>
+                        <input type="tel" class="form-control" placeholder="Enter Phone Number" name="Phone_number" id="Phone_number" value="{{ request.form.get('Phone_number', '') }}" required>
+                    </div>
+                    <small id="phone-error" class="form-text text-danger" style="display: none;">Please enter a valid phone number (only numbers allowed).</small>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="Password1" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bx bx-lock-alt text-primary"></i>
+                        </span>
+                        <input type="password" class="form-control" placeholder="Enter Password" name="Password1" id="Password1" required minlength="6">
+                    </div>
+                    <small id="password-error" class="form-text text-danger" style="display: none;">Password must be at least 6 characters long.</small>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-4">
+                    <label for="Password2" class="form-label fw-semibold">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bx bx-lock-alt text-primary"></i>
+                        </span>
+                        <input type="password" class="form-control" placeholder="Confirm Password" name="Password2" id="Password2" required>
+                    </div>
+                    <small id="password-match-error" class="form-text text-danger" style="display: none;">Passwords do not match.</small>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
+                </div>
+
+                <!-- Additional Links -->
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="#" class="text-primary small">Contact us</a>
+                    <a href="#" class="text-primary small">Need Help?</a>
+                </div>
+            </form>
         </div>
     </div>
-</form>
+</div>
 
+<script>
+    // Password and Email Validation
+    function validateForm() {
+        let email = document.getElementById("email");
+        let password1 = document.getElementById("Password1");
+        let password2 = document.getElementById("Password2");
+        let phone = document.getElementById("Phone_number");
+        let first_name = document.getElementById("first_name");
+        let last_name = document.getElementById("last_name");
+
+        let emailError = document.getElementById("email-error");
+        let passwordError = document.getElementById("password-error");
+        let passwordMatchError = document.getElementById("password-match-error");
+        let phoneError = document.getElementById("phone-error");
+        let firstNameError = document.getElementById("first_name-error");
+        let lastNameError = document.getElementById("last_name-error");
+
+        let formIsValid = true;
+
+        // Validate First Name
+        if (first_name.value === "") {
+            firstNameError.style.display = "block";
+            formIsValid = false;
+        } else {
+            firstNameError.style.display = "none";
+        }
+
+        // Validate Last Name
+        if (last_name.value === "") {
+            lastNameError.style.display = "block";
+            formIsValid = false;
+        } else {
+            lastNameError.style.display = "none";
+        }
+
+        // Email Validation
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (email.value === "") {
+            emailError.style.display = "none"; // Hide if no email entered
+        } else if (!emailPattern.test(email.value)) {
+            emailError.style.display = "block";
+            formIsValid = false;
+        } else {
+            emailError.style.display = "none";
+        }
+
+        // Phone Number Validation (Only Numbers)
+        const phonePattern = /^[0-9]+$/;
+        if (phone.value === "") {
+            phoneError.style.display = "none"; // Hide if no phone number entered
+        } else if (!phonePattern.test(phone.value)) {
+            phoneError.style.display = "block";
+            formIsValid = false;
+        } else {
+            phoneError.style.display = "none";
+        }
+
+        // Password Validation
+        if (password1.value === "" || password1.value.length < 6) {
+            passwordError.style.display = "block";
+            formIsValid = false;
+        } else {
+            passwordError.style.display = "none";
+        }
+
+        // Confirm Password Match
+        if (password1.value !== password2.value) {
+            passwordMatchError.style.display = "block";
+            formIsValid = false;
+        } else {
+            passwordMatchError.style.display = "none";
+        }
+
+        return formIsValid;
+    }
+</script>
 {% endblock content %}
