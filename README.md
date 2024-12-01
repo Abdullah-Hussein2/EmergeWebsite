@@ -3,6 +3,7 @@
 This is the finale porject for the CS50X-IRAQ
 
 Instlation:
+
  	-requirements:
  A-git bash
  B-vs code
