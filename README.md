@@ -7,7 +7,7 @@ Instlation:
  A-git bash
  B-vs code
 
--Steps
+ -Steps
 A-clone the repo using git
 	-git clone https://github.com/Abdullah-Hussein2/Emerge_projectcs50x.git
 
