@@ -20,10 +20,12 @@ def Users_dashboard():
     for role in roles:
         role.users = User.query.filter(User.roles.any(id=role.id)).all()
 
-    return render_template("Users_dashboard.html", roles=roles, current_user=current_user)
+    return render_template("Adminstartion/users_dashboard.html", roles=roles, current_user=current_user)
 
 # Add Role to User
 @admindash.route('/add_role_to_user', methods=['POST'])
+@login_required
+@roles_required('Admin')
 def add_role_to_user():
     user_id = request.form.get('user_id')
     role_id = request.form.get('role_id')
@@ -43,6 +45,8 @@ def add_role_to_user():
 
 # Delete User
 @admindash.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+@roles_required('Admin')
 def delete_user(user_id):
     user = User.query.get(user_id)
 
@@ -62,6 +66,7 @@ def delete_user(user_id):
 # Edit User
 @admindash.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
 @login_required
+@roles_required('Admin')
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)  # Get the user by ID
 
@@ -84,7 +89,7 @@ def edit_user(user_id):
         if new_password:  # Check if the password field is not empty
             if len(new_password) < 6:
                 flash('Password must be at least 6 characters long.', 'danger')
-                return render_template('edit_user.html', user=user, roles=Role.query.all())
+                return render_template('Adminstartion/edit_user.html', user=user, roles=Role.query.all())
             else:
                 user.password = generate_password_hash(new_password)  # Hash and update password
 
@@ -101,10 +106,12 @@ def edit_user(user_id):
             db.session.rollback()  # Rollback if there is an error
             flash('An error occurred while updating the user.', 'danger')
 
-    return render_template('edit_user.html', user=user, roles=Role.query.all())
+    return render_template('Adminstartion/edit_user.html', user=user, roles=Role.query.all())
 
 # Add User
 @admindash.route('/add_user', methods=['GET', 'POST'])
+@login_required
+@roles_required('Admin')
 def add_user():
     if request.method == 'POST':
         first_name = request.form['first_name']
@@ -143,10 +150,12 @@ def add_user():
         return redirect(url_for('admindash.Users_dashboard'))
 
     all_roles = Role.query.all()
-    return render_template('add_user.html', all_roles=all_roles)
+    return render_template('Adminstartion/add_user.html', all_roles=all_roles)
 
 # Display User Profile Image
 @admindash.route('/view_user/<int:user_id>', methods=['GET'])
+@login_required
+@roles_required('Admin')
 def view_user(user_id):
     user = User.query.get_or_404(user_id)
     if user.image:
@@ -157,6 +166,8 @@ def view_user(user_id):
 
 
 @admindash.route('/Anlytics')
+@login_required
+@roles_required('Admin')
 def Anlytics():
 
 # Query total users
@@ -180,8 +191,8 @@ def Anlytics():
 
     # Pass data to the template
     return render_template(
-        'Anlytics.html',
-        total_users_count=total_users_count,
-        active_users_count=active_users_count,
-        roles_data=roles_data
+        'Adminstartion/Anlytics.html',
+        total_users_count = total_users_count,
+        active_users_count = active_users_count,
+        roles_data = roles_data
     )

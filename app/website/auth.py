@@ -30,7 +30,7 @@ def login():
         else:
             flash('Email is incorrect or doesn\'t exist.', category='error')
 
-    return render_template("login.html", user=current_user)
+    return render_template("Auth/login.html", user=current_user)
 
 
 # Signup route
@@ -99,7 +99,7 @@ def sign_up():
             flash('Account created successfully!', category='success')
             return redirect(url_for('views.home'))  # Redirect to home or dashboard
 
-    return render_template("signup.html", user=current_user)
+    return render_template("Auth/signup.html", user=current_user)
 
 
 

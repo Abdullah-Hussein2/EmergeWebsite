@@ -10,7 +10,7 @@ views = Blueprint("views", __name__)
 @views.route("/")
 @views.route("/home")
 def home():
-    return render_template("home.html", user=current_user)
+    return render_template("Core/home.html", user=current_user)
 
 
 
@@ -35,25 +35,23 @@ def user_profile(user_id):
 
 # Route to serve user image from database
 @views.route('/user_image/<int:user_id>')
+@login_required
+@roles_required('Admin')
 def user_image(user_id):
-
-
-
     user = User.query.get(user_id)
     if user and user.image:
         return Response(user.image, mimetype='image/jpeg')
     return "Image not found", 404
 @views.errorhandler(403)
 def forbidden_error(error):
-    return render_template('403.html'), 403
+    return render_template('Error/403.html'), 403
 
 
 @views.route('/services')
-@login_required
 def services():
     if not current_user.is_authenticated or not current_user.has_roles('Admin'):
         abort(403)
-    return render_template('services.html')
+    return render_template('Core/services.html')
 
 
 
