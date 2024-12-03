@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2 class="text-center text-white">Admin Panel</h2>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="home">Home page</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="Anlytics">Analytics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admindash.Doctors_dashboard') }}">Doctors Dashboard</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Doctors Dashboard</h1>
+            <a href="{{ url_for('admindash.add_user') }}" class="btn btn-success">Add New Doctor</a>
+        </div>
+
+        <!-- Tabs for Specializations -->
+        <ul class="nav nav-tabs" id="specializationTabs" role="tablist">
+            {% for specialization, doctors in grouped_doctors.items() %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.index == 1 %}active{% endif %}" id="{{ specialization }}-tab"
+                    data-bs-toggle="tab" data-bs-target="#{{ specialization | replace(' ', '_') }}" type="button"
+                    role="tab" aria-controls="{{ specialization }}"
+                    aria-selected="{{ 'true' if loop.index == 1 else 'false' }}">
+                    {{ specialization }}
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="tab-content tabs-container">
+            {% for specialization, doctors in grouped_doctors.items() %}
+            <div class="tab-pane fade {% if loop.index == 1 %}show active{% endif %}"
+                id="{{ specialization | replace(' ', '_') }}" role="tabpanel"
+                aria-labelledby="{{ specialization }}-tab">
+                <h3 class="mt-3">{{ specialization }} Doctors</h3>
+
+                <!-- Search Bar -->
+                <div class="mb-3">
+                    <input type="text" id="search-{{ specialization | replace(' ', '_') }}" class="form-control"
+                        placeholder="Search doctors..."
+                        onkeyup="searchDoctor('{{ specialization | replace(' ', '_') }}')" />
+                </div>
+
+                <!-- Table for Specialization -->
+                <table class="table table-bordered table-striped mt-3"
+                    id="doctor-table-{{ specialization | replace(' ', '_') }}">
+                    <thead class="table-light">
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Available</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doctor in doctors %}
+                        <tr>
+                            <td>{{ doctor.first_name }}</td>
+                            <td>{{ doctor.last_name }}</td>
+                            <td>{{ doctor.email }}</td>
+                            <td>{{ doctor.phone_number or 'N/A' }}</td>
+                            <td>{{ 'Yes' if doctor.available else 'No' }}</td>
+                            <td>
+                                <a href="{{ url_for('admindash.edit_user', user_id=doctor.id) }}"
+                                    class="btn btn-warning btn-sm">Edit</a>
+                                <button class="btn btn-danger btn-sm"
+                                    onclick="confirmDoctorDelete('{{ doctor.id }}')">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this doctor? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" action="" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript for Search and Modal -->
+    <script>
+        function searchDoctor(specializationName) {
+            const searchInput = document.getElementById('search-' + specializationName);
+            const table = document.getElementById('doctor-table-' + specializationName);
+            const rows = table.getElementsByTagName('tr');
+            const searchTerm = searchInput.value.toLowerCase();
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let rowText = '';
+                for (let j = 0; j < cells.length; j++) {
+                    rowText += cells[j].innerText.toLowerCase() + ' ';
+                }
+                row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+            }
+        }
+
+        function confirmDoctorDelete(doctorId) {
+            document.getElementById('deleteForm').action = 'delete_user/' + doctorId;
+            var myModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            myModal.show();
+        }
+    </script>
+</body>
+
+</html>

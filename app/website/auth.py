@@ -6,14 +6,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import AnonymousUserMixin
 import re
 
-
 auth = Blueprint("auth", __name__)
 
 # Login route
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+
         # If the user is already logged in, redirect to the home page or dashboard
+
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
@@ -30,7 +31,7 @@ def login():
         else:
             flash('Email is incorrect or doesn\'t exist.', category='error')
 
-    return render_template("Auth/login.html", user=current_user)
+    return render_template("Auth/login.html", user = current_user)
 
 
 # Signup route

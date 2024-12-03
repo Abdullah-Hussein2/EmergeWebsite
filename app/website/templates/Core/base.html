@@ -31,18 +31,25 @@
                     <li class="nav-item">
                         <a class="nav-link active text-dark" href="/">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="/blog">Blog</a>
-                    </li>
+                    <div class="dropdown">
+                        <button class="dropbtn">Dropdown</button>
+                        <div class="dropdown-content">
+                            <a href="#">Link 1</a>
+                            <a href="#">Link 2</a>
+                            <a href="#">Link 3</a>
+                        </div>
+                    </div>
                     <li class="nav-item">
                         <a class="nav-link text-dark" href="/about">About</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-dark" href="/posts">Posts</a>
                     </li>
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link text-dark" href="/services">Services</a>
+                        <a class="nav-link text-dark" href="{{ url_for('views.profile', user_id=current_user.id) }}">Profile</a>
                     </li>
+                    {% endif %}
                     {% if current_user.is_authenticated and current_user.has_roles('Admin') %}
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="/Users_dashboard">Admin</a>
@@ -85,7 +92,7 @@
     <!-- Footer -->
     <footer class="bg-dark text-white py-4">
         <div class="container text-center">
-            <p class="mb-0">&copy; {{ year }} EMERGE. All Rights Reserved.</p>
+            <p class="mb-0">&copy; {{ 2024 }} EMERGE. All Rights Reserved.</p>
         </div>
     </footer>
 

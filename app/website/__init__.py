@@ -1,9 +1,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
+from sqlalchemy.exc import OperationalError
 from flask_login import LoginManager
 from flask_user import UserManager
 from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
+from werkzeug.security import generate_password_hash
+
 
 # Initialize db and bcrypt
 db = SQLAlchemy()
@@ -31,26 +35,32 @@ def create_app():
     app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
 
-    from .models import User, Role
+    migrate = Migrate(app, db)
+
+
+    from .models import User, Role , UserRoles, Doctor, Appointment
 
     # Initialize user_manager
     user_manager = UserManager(app, db, User)
 
     # Adding the roles
     def setup_roles():
-        roles = ['User', 'Admin', 'Poster', 'Doctor']
-        for role_name in roles:
-            if not Role.query.filter_by(name=role_name).first():
-                new_role = Role(name=role_name)
-                db.session.add(new_role)
-        db.session.commit()
+        try:
+            roles = ['User', 'Admin', 'Poster', 'Doctor']
+            for role_name in roles:
+                if not Role.query.filter_by(name=role_name).first():
+                    new_role = Role(name=role_name)
+                    db.session.add(new_role)
+            db.session.commit()
+        except OperationalError as e:
+            print(f"Error accessing Role table: {e}")
 
     with app.app_context():
-        # Ensure roles are set up and tables are created
-        db.create_all()  # Create tables (if they don't exist)
-        setup_roles()    # Add default roles if they don't exist
-
-        # Create an admin user if it doesn't exist
+        print("Creating all tables...")
+        db.create_all()
+        print("Tables created successfully.")
+        setup_roles()
+        print("Roles setup completed.")
         create_admin_user()
 
     # Initialize LoginManager
@@ -78,7 +88,7 @@ def create_admin_user():
             first_name="Admin",
             last_name="User",
             email="ab@gmail.com",
-            password='123123'  # Store the hashed password
+            password=generate_password_hash('123123')
         )
 
         # Assign the admin role

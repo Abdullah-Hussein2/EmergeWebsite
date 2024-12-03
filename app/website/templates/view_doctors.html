@@ -1,0 +1,29 @@
+{% extends "Core/base.html" %}
+
+{% block content %}
+<h2>Doctors List</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Specialization</th>
+            <th>Phone Number</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doctor in doctors %}
+        <tr>
+            <td>{{ doctor.first_name }}</td>
+            <td>{{ doctor.last_name }}</td>
+            <td>{{ doctor.email }}</td>
+            <td>{{ doctor.specialization }}</td>
+            <td>{{ doctor.phone_number }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

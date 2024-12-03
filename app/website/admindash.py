@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, Response
 from flask_login import login_required, current_user
 from flask_user import roles_required
-from .models import User, Role
+from .models import User, Role , Doctor
 from . import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import SQLAlchemyError
@@ -66,7 +66,6 @@ def delete_user(user_id):
 # Edit User
 @admindash.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
 @login_required
-@roles_required('Admin')
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)  # Get the user by ID
 
@@ -114,14 +113,14 @@ def edit_user(user_id):
 @roles_required('Admin')
 def add_user():
     if request.method == 'POST':
+        # Retrieve form fields
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         email = request.form['email']
         password = request.form['password']
-        phone_number = request.form['phone_number']  # Capturing phone number
+        phone_number = request.form['phone_number']
         description = request.form['description']
         role_ids = request.form.getlist('role_ids')
-
         image = request.files['image']
         image_binary = image.read() if image else None
 
@@ -131,7 +130,7 @@ def add_user():
             last_name=last_name,
             email=email,
             password=generate_password_hash(password),
-            phone_number=phone_number,  # Assigning phone number
+            phone_number=phone_number,
             description=description,
             image=image_binary
         )
@@ -142,16 +141,42 @@ def add_user():
             if role:
                 new_user.roles.append(role)
 
-        # Add the user to the database
         db.session.add(new_user)
         db.session.commit()
+
+        # Check if the new user has the "Doctor" role
+        doctor_role = Role.query.filter_by(name='Doctor').first()
+        if doctor_role and doctor_role in new_user.roles:
+            # Capture doctor-specific fields
+            specialization = request.form.get('specialization') or request.form.get('new_specialization')
+            available = request.form.get('available') == 'Yes'
+
+            # Create a Doctor entry
+            new_doctor = Doctor(
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                password=generate_password_hash(password),
+                specialization=specialization,
+                phone_number=phone_number,
+                available=available
+            )
+
+            db.session.add(new_doctor)
+            db.session.commit()
 
         flash('User added successfully!', 'success')
         return redirect(url_for('admindash.Users_dashboard'))
 
-    all_roles = Role.query.all()
-    return render_template('Adminstartion/add_user.html', all_roles=all_roles)
+    # Query the 20 most common specializations
+    most_common_specializations = db.session.query(
+        Doctor.specialization, db.func.count(Doctor.specialization).label('count')
+    ).group_by(Doctor.specialization).order_by(db.desc('count')).limit(20).all()
 
+    specializations = [s[0] for s in most_common_specializations]  # Extract specialization names
+    all_roles = Role.query.all()
+
+    return render_template('Adminstartion/add_user.html', all_roles=all_roles, specializations=specializations)
 # Display User Profile Image
 @admindash.route('/view_user/<int:user_id>', methods=['GET'])
 @login_required
@@ -196,3 +221,21 @@ def Anlytics():
         active_users_count = active_users_count,
         roles_data = roles_data
     )
+
+
+@admindash.route('/Doctors_dashboard', methods=['GET'])
+@login_required
+@roles_required('Admin')
+def Doctors_dashboard():
+    from collections import defaultdict
+
+    # Fetch all doctors from the database
+    doctors = Doctor.query.all()
+
+    # Group doctors by specialization
+    grouped_doctors = defaultdict(list)
+    for doctor in doctors:
+        grouped_doctors[doctor.specialization].append(doctor)
+
+    return render_template("Adminstartion/doctors_dashboard.html", grouped_doctors=grouped_doctors,
+                           current_user=current_user)
