@@ -13,7 +13,7 @@ auth = Blueprint("auth", __name__)
 def login():
     if current_user.is_authenticated:
 
-        # If the user is already logged in, redirect to the home page or dashboard
+        # If the user is already logged in, redirect to the home page
 
         return redirect(url_for('views.home'))
 

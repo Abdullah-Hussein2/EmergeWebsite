@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from os import path
 from sqlalchemy.exc import OperationalError
 from flask_login import LoginManager
 from flask_user import UserManager
@@ -38,7 +37,7 @@ def create_app():
     migrate = Migrate(app, db)
 
 
-    from .models import User, Role , UserRoles, Doctor, Appointment
+    from .models import User, Role , UserRoles, Doctor
 
     # Initialize user_manager
     user_manager = UserManager(app, db, User)
@@ -46,7 +45,7 @@ def create_app():
     # Adding the roles
     def setup_roles():
         try:
-            roles = ['User', 'Admin', 'Poster', 'Doctor']
+            roles = ['User', 'Admin', 'Poster', 'Doctor' , 'TESTROLE1' , 'TESTROLE2']
             for role_name in roles:
                 if not Role.query.filter_by(name=role_name).first():
                     new_role = Role(name=role_name)

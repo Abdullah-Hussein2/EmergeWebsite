@@ -45,11 +45,6 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" href="/posts">Posts</a>
                     </li>
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" href="{{ url_for('views.profile', user_id=current_user.id) }}">Profile</a>
-                    </li>
-                    {% endif %}
                     {% if current_user.is_authenticated and current_user.has_roles('Admin') %}
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="/Users_dashboard">Admin</a>

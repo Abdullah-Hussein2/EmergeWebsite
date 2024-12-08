@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ doctor.first_name }} {{ doctor.last_name }}'s Profile</title>
+</head>
+<body>
+    <div class="profile-container">
+        <h2>{{ doctor.first_name }} {{ doctor.last_name }}</h2>
+        <p>Email: {{ doctor.email }}</p>
+        <p>Phone: {{ doctor.phone_number or 'N/A' }}</p>
+        <p>Specialization: {{ doctor.specialization }}</p>
+        <p>Available: {{ 'Yes' if doctor.available else 'No' }}</p>
+        <p>Description: {{ doctor.description or 'No description available.' }}</p>
+        <!-- Add more fields as necessary -->
+    </div>
+</body>
+</html>
