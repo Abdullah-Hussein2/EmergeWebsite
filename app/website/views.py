@@ -12,7 +12,9 @@ views = Blueprint("views", __name__)
 @views.route("/")
 @views.route("/home")
 def home():
-    return render_template("Core/home.html", user=current_user)
+    internal_doctors = Doctor.query.filter_by(specialization='Internal').limit(5).all()
+    ophthalmologists = Doctor.query.filter_by(specialization='Ophthalmologist').limit(5).all()
+    return render_template("Core/home.html", internal_doctors=internal_doctors, ophthalmologists=ophthalmologists)
 
 
 
