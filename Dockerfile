@@ -16,9 +16,11 @@ RUN apt-get update && apt-get install -y \
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy and install application dependencies first for Docker caching
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# Copy dependency file requirements first to leverage caching
+COPY requirements.txt /tmp/requirements.txt
+
+# Install dependencies
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Copy the entire application code
 COPY . /app
@@ -26,11 +28,5 @@ COPY . /app
 # Expose the port Flask will run on
 EXPOSE 5000
 
-# Set environment variables for Flask
-# Replace these with your production values or use Railway's environment configuration
-ENV FLASK_APP=app
-ENV FLASK_ENV=production
-ENV PYTHONUNBUFFERED=1
-
 # Run the Flask app through Gunicorn with create_app()
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:create_app()"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app.__init__:create_app()"]
