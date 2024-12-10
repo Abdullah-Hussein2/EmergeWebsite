@@ -38,7 +38,7 @@ WORKDIR /code
 COPY requirements.txt /tmp/requirements.txt
 
 # copy the project code into the container's working directory
-COPY ./app /code
+COPY ./src /code
 
 # Install the Python project requirements
 RUN pip install -r /tmp/requirements.txt
@@ -56,7 +56,8 @@ ARG PROJ_NAME="sfchome"
 # the container starts and the database is available
 RUN printf "#!/bin/bash\n" > ./paracord_runner.sh && \
     printf "RUN_PORT=\"\${PORT:-8000}\"\n\n" >> ./paracord_runner.sh && \
-    printf "cd app && python app.py" >> ./paracord_runner.sh && \
+    printf "cd app" >> ./paracord_runner.sh && \
+    printf "python app.py" >> ./paracord_runner.sh && \
     printf "gunicorn ${PROJ_NAME}.wsgi:application --bind \"0.0.0.0:\$RUN_PORT\"\n" >> ./paracord_runner.sh
 
 # make the bash script executable
@@ -67,3 +68,7 @@ RUN apt-get remove --purge -y \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Run the Django project via the runtime script
+# when the container starts
+CMD ./paracord_runner.sh
