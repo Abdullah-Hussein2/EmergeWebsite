@@ -1,32 +1,32 @@
-# Use a lightweight Python base image
+# Use a minimal Python image
 FROM python:3.12-slim-bullseye
 
 # Upgrade pip to the latest version
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install system-level dependencies for Python libraries
+# Install system dependencies for Python libraries
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     libjpeg-dev \
-    zlib1g-dev \
     gcc \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy dependency file requirements first to leverage caching
-COPY requirements.txt /tmp/requirements.txt
+# Copy only the requirements file initially (to leverage Docker layer caching)
+COPY requirements.txt /app/requirements.txt
 
-# Install dependencies
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy the entire application code
+# Copy the entire project into the container
 COPY . /app
 
-# Expose the port Flask will run on
+# Expose Flask's port
 EXPOSE 5000
 
-# Run the Flask app through Gunicorn with create_app()
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app.__init__:create_app()"]
+# Use Gunicorn to run the application
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "website:create_app()"]
