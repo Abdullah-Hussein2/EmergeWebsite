@@ -1,35 +1,21 @@
-# Start with a minimal Python 3.12 base image
+# Use an official Python image
 FROM python:3.12-slim-bullseye
 
-# Upgrade pip to the latest version
+# Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
-
-# Install required system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    libjpeg-dev \
-    zlib1g-dev \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the dependencies file first for caching
+# Copy requirement files and install dependencies
 COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python libraries
-RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Copy the entire project into the container
+# Copy the application code into the container
 COPY . /app
 
-# Set PYTHONPATH to include the app directory, so Python can find `website` module
-ENV PYTHONPATH=/app/app:$PYTHONPATH
+# Expose the port that Railway provides
+EXPOSE $PORT
 
-# Expose the default Flask port
-EXPOSE 5000
-
-# Run the Flask app using Gunicorn
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "website:create_app()"]
+# Start Gunicorn for production
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:$PORT", "website:create_app()"]
