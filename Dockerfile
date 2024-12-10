@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 
 # Expose the port that Railway provides
-EXPOSE $PORT
+EXPOSE 5000
 
 # Start Gunicorn for production
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:$PORT", "website:create_app()"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "website:create_app()"]
