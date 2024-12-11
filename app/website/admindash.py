@@ -83,6 +83,7 @@ def delete_user(user_id):
 # Edit User
 @admindash.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
 @login_required
+@roles_required('Admin')
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)  # Get the user by ID
 
@@ -182,15 +183,14 @@ def add_user():
 
 
 
-# Display User Profile Image
+# View User profile
 @admindash.route('/view_user/<int:user_id>', methods=['GET'])
 @login_required
 @roles_required('Admin')
 def view_user(user_id):
-    user = User.query.get_or_404(user_id)
-    if user.image:
-        return Response(user.image, mimetype='image/jpeg')
-    return "No image available", 404
+    user = User.query.get_or_404(user_id)  # Fetch user by ID
+    roles = user.roles  # Get associated roles
+    return render_template('Adminstartion/user_profile.html', user=user, roles=roles)
 
 
 
@@ -253,12 +253,6 @@ def Doctors_dashboard():
 
 
 
-@admindash.route('/doctor_profile/<int:doctor_id>', methods=['GET'])
-@login_required
-@roles_required('Admin')
-def doctor_profile(doctor_id):
-    doctor = Doctor.query.get_or_404(doctor_id)
-    return render_template('Adminstartion/doctor_profile.html', doctor=doctor)
 
 
 
@@ -271,51 +265,65 @@ def doctor_profile(doctor_id):
 @roles_required('Admin')
 def edit_doctor(doctor_id):
     # Fetch the doctor from the database
-    doctor = Doctor.query.get_or_404(doctor_id)  # Get the doctor by ID
+    doctor = Doctor.query.get_or_404(doctor_id)
 
     if request.method == 'POST':
+        # Retrieve form fields
+        doctor.first_name = request.form['first_name']
+        doctor.last_name = request.form['last_name']
+        doctor.email = request.form['email']
+        doctor.phone_number = request.form['phone_number']
+        doctor.description = request.form['description']
+        role_ids = request.form.getlist('role_ids')  # Get selected roles
+        password = request.form.get('password')
+
+        # Update specialization
         specialization = request.form['specialization'] or request.form['new_specialization']
         doctor.specialization = specialization
+
+        # Update availability
+        doctor.available = request.form.get('available', 'No')
+
+        # Update roles
+        new_roles = Role.query.filter(Role.id.in_(role_ids)).all()  # Fetch selected roles
+        doctor.roles = new_roles
+
+        # Update password if provided
+        if password:
+            if len(password) < 6:
+                flash('Password must be at least 6 characters long.', 'danger')
+                return redirect(url_for('admindash.edit_doctor', doctor_id=doctor.id))
+            doctor.password = generate_password_hash(password)
+
+        # Handle image upload
+        image = request.files.get('image')
+        if image:
+            doctor.image = image.read()
+
         # Commit changes to the database
         try:
-            db.session.commit()  # Commit changes to the database
+            db.session.commit()
             flash('Doctor updated successfully!', 'success')
             return redirect(url_for('admindash.Doctors_dashboard'))
         except SQLAlchemyError:
-            db.session.rollback()  # Rollback if there is an error
+            db.session.rollback()  # Rollback changes on error
             flash('An error occurred while updating the doctor.', 'danger')
 
-    # Query specializations list
+    # Query all roles for the roles dropdown
+    roles = Role.query.all()
+
+    # Query most common specializations
     most_common_specializations = db.session.query(
         Doctor.specialization, db.func.count(Doctor.specialization).label('count')
     ).group_by(Doctor.specialization).order_by(db.desc('count')).limit(20).all()
-
     specializations = [s[0] for s in most_common_specializations]
 
-    return render_template('Adminstartion/edit_doctor.html', doctor=doctor, specializations=specializations)
-
-
-
-
-
-
-@admindash.route('/doctor_analytics', methods=['GET'])
-@login_required
-@roles_required('Admin')
-def doctor_analytics():
-    specializations_data = (
-        db.session.query(
-            Doctor.specialization,
-            func.count(Doctor.id).label('count')
-        )
-        .group_by(Doctor.specialization)
-        .order_by(func.count(Doctor.id).desc())
-        .all()
+    return render_template(
+        'Adminstartion/edit_doctor.html',
+        doctor=doctor,
+        roles=roles,
+        specializations=specializations
     )
-
-    specializations = [{'name': spec[0], 'count': spec[1]} for spec in specializations_data]
-
-    return render_template('Adminstartion/doctor_analytics.html', specializations=specializations)
 
 
 
@@ -351,14 +359,16 @@ def add_doctor():
         description = request.form['description']
         specialization = request.form['specialization']
         available = request.form.get('available', 'No')
+        role_ids = request.form.getlist('role_ids')  # Get selected roles
         image = request.files['image']
         image_binary = image.read() if image else None
 
+        # Validate required fields
         if not (email and first_name and last_name and password and specialization):
             flash('Please fill in all required fields.', 'danger')
             return redirect(url_for('admindash.add_doctor'))
 
-        # Check if the email already exists in doctors
+        # Check if the email already exists
         existing_doctor = Doctor.query.filter_by(email=email).first()
         if existing_doctor:
             flash('A doctor with this email already exists.', 'danger')
@@ -376,8 +386,15 @@ def add_doctor():
             specialization=specialization,
             available=available
         )
-        db.session.add(new_doctor)
 
+        # Add roles to the doctor
+        for role_id in role_ids:
+            role = Role.query.get(role_id)
+            if role:
+                new_doctor.roles.append(role)
+
+        # Commit to the database
+        db.session.add(new_doctor)
         try:
             db.session.commit()
             flash('Doctor added successfully!', 'success')
@@ -386,13 +403,73 @@ def add_doctor():
             db.session.rollback()
             flash('An error occurred while adding the doctor.', 'danger')
 
-    return render_template('Adminstartion/add_doctor.html')
+    # Query specializations and all roles
+    most_common_specializations = db.session.query(
+        Doctor.specialization, db.func.count(Doctor.specialization).label('count')
+    ).group_by(Doctor.specialization).order_by(db.desc('count')).limit(20).all()
+
+    specializations = [s[0] for s in most_common_specializations]
+    roles = Role.query.all()  # Fetch all roles
+
+    return render_template('Adminstartion/add_doctor.html', roles=roles, specializations=specializations)
 
 
+
+@admindash.route('/view_doctor_image/<int:doctor_id>', methods=['GET'])
+@login_required
+@roles_required('Admin')
+def view_doctor_image(doctor_id):
+    doctor = Doctor.query.get_or_404(doctor_id)
+    if doctor.image:
+        return Response(doctor.image, mimetype='image/jpeg')
+    return "No image available", 404
 
 
 @admindash.route('/doctor_profile/<int:doctor_id>', methods=['GET'])
-def doctor_detail(doctor_id):
+@login_required
+def doctor_profile(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
     return render_template('Adminstartion/doctor_profile.html', doctor=doctor)
 
+
+
+
+@admindash.route('/doctor_analytics', methods=['GET'])
+@login_required
+@roles_required('Admin')
+def doctor_analytics():
+    specializations_data = (
+        db.session.query(
+            Doctor.specialization,
+            func.count(Doctor.id).label('count')
+        )
+        .group_by(Doctor.specialization)
+        .order_by(func.count(Doctor.id).desc())
+        .all()
+    )
+
+    specializations = [{'name': spec[0], 'count': spec[1]} for spec in specializations_data]
+
+    return render_template('Adminstartion/doctor_analytics.html', specializations=specializations)
+
+
+@admindash.route('/search_doctors', methods=['GET'])
+@login_required
+@roles_required('Admin')
+def search_doctors():
+    query = request.args.get('q', '')  # Get the search query from the request
+    if not query:
+        flash("Please enter a search term.", "info")
+        return redirect(url_for('admindash.Doctors_dashboard'))  # Redirect if no query is entered
+
+    # Perform the search using SQLAlchemy filters
+    doctors = Doctor.query.filter(
+        (Doctor.first_name.ilike(f'%{query}%')) |
+        (Doctor.last_name.ilike(f'%{query}%')) |
+        (Doctor.email.ilike(f'%{query}%')) |
+        (Doctor.specialization.ilike(f'%{query}%')) |
+        (Doctor.phone_number.ilike(f'%{query}%'))
+    ).all()
+
+    # Render a result page with the filtered doctors
+    return render_template('Adminstartion/search_results.html', doctors=doctors, query=query)

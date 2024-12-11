@@ -16,7 +16,7 @@
     transition: .2s linear;
 }
 html{
-    font-size: 62.5%;   
+    font-size: 62.5%;
     overflow-x: hidden;
     scroll-padding-top: 7rem;
     scroll-behavior: smooth;
@@ -248,7 +248,7 @@ section{
     color: var(--black);
     padding: 1rem 0;
     line-height: 1.8;
-    
+
 }
 .blogs .blogs-row .box .content a{
     font-size: 2rem;
@@ -258,7 +258,7 @@ section{
     color: var(--black);
     text-shadow: var(--box-shadow);
 }
- 
+
 .newsletter{
     background: url(bk.png) no-repeat;
     background-size: cover;
@@ -302,10 +302,10 @@ section{
     display: flex;
     flex-direction: column ;
     align-items: center;
-    
+
 }
 .review .review-row .box{
-    width: 50%; 
+    width: 50%;
     margin-bottom: 3rem;
     padding: 3rem;
     border-radius: 3rem;
@@ -353,11 +353,11 @@ section{
     grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
     gap: 1.5rem;
     padding: 2rem 1rem;*/
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-start; 
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     padding: 0.5rem 2rem;
-    gap: 2rem; 
+    gap: 2rem;
 }
 .footer .box{
     flex: 1;
@@ -367,7 +367,7 @@ section{
 }
 
 .footer .box:nth-child(2) {
-    text-align: right; 
+    text-align: right;
 }
 .footer .box-container .mainBox .content{
     display: flex;
@@ -427,7 +427,7 @@ section{
     padding-bottom: 0.5rem;
     color: var(--black);
     text-align: center;
-    
+
 }
 
 .swiper-pagination-bullet{
@@ -488,4 +488,37 @@ section{
     html{
         font-size: 50%;
     }
+}
+.lang-btn {
+    background-color: var(--black);
+    color: var(--white);
+    border: none;
+    border-radius: 0.5rem;
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.lang-btn:hover {
+    background-color: var(--white);
+    color: var(--black);
+    border: 1px solid var(--black);
+}
+/* Styling for cards */
+.doctor-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Button styling */
+.doctor-card a {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.doctor-card a:hover {
+    background-color: #0056b3; /* Darker shade of blue */
+    transform: scale(1.05);
 }

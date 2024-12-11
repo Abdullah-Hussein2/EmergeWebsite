@@ -1,19 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ doctor.first_name }} {{ doctor.last_name }}'s Profile</title>
-</head>
-<body>
-    <div class="profile-container">
-        <h2>{{ doctor.first_name }} {{ doctor.last_name }}</h2>
-        <p>Email: {{ doctor.email }}</p>
-        <p>Phone: {{ doctor.phone_number or 'N/A' }}</p>
-        <p>Specialization: {{ doctor.specialization }}</p>
-        <p>Available: {{ 'Yes' if doctor.available else 'No' }}</p>
-        <p>Description: {{ doctor.description or 'No description available.' }}</p>
-        <!-- Add more fields as necessary -->
+{% extends "Core/base.html" %}
+
+{% block title %}
+Doctor Profile
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header text-center">
+            <h2>Doctor Profile</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Doctor Image -->
+                <div class="col-md-4 text-center">
+                    {% if doctor.image %}
+                        <img src="{{ url_for('admindash.view_doctor_image', doctor_id=doctor.id) }}"
+                             class="img-fluid rounded-circle mb-3" alt="Doctor Image">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle mb-3" alt="No Image">
+                    {% endif %}
+                </div>
+                <!-- Doctor Info -->
+                <div class="col-md-8">
+                    <h3>{{ doctor.first_name }} {{ doctor.last_name }}</h3>
+                    <p><strong>Email:</strong> {{ doctor.email }}</p>
+                    <p><strong>Phone:</strong> {{ doctor.phone_number or 'N/A' }}</p>
+                    <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+                    <p><strong>Availability:</strong> {{ doctor.available }}</p>
+                    <p><strong>Description:</strong> {{ doctor.description or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{{ url_for('admindash.Doctors_dashboard') }}" class="btn btn-secondary">Back to Doctors Dashboard</a>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

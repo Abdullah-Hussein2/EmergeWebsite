@@ -2,8 +2,7 @@ from flask import Blueprint , render_template , redirect ,url_for , Response , r
 from flask_login import current_user, login_required
 from flask_user import roles_required
 from .models import User , Doctor
-
-
+from flask import session
 
 views = Blueprint("views", __name__)
 
@@ -14,8 +13,9 @@ views = Blueprint("views", __name__)
 def home():
     internal_doctors = Doctor.query.filter_by(specialization='Internal').limit(5).all()
     ophthalmologists = Doctor.query.filter_by(specialization='Ophthalmologist').limit(5).all()
-    return render_template("Core/home.html", internal_doctors=internal_doctors, ophthalmologists=ophthalmologists)
-
+    return render_template("Core/home.html", 
+                           internal_doctors=internal_doctors, 
+                           ophthalmologists=ophthalmologists)
 
 
 # Route to serve user image from database
@@ -27,6 +27,8 @@ def user_image(user_id):
     if user and user.image:
         return Response(user.image, mimetype='image/jpeg')
     return "Image not found", 404
+
+
 @views.errorhandler(403)
 def forbidden_error(error):
     return render_template('Error/403.html'), 403
@@ -37,7 +39,6 @@ def forbidden_error(error):
 
 @views.route('/doctors')
 @login_required
-@roles_required('Admin')
 def view_doctors():
     doctors = Doctor.query.all()
     return render_template('Adminstartion/view_doctors.html', doctors=doctors)
@@ -51,3 +52,5 @@ def services():
     if not current_user.is_authenticated or not current_user.has_roles('Admin'):
         abort(403)
     return render_template('Core/services.html')
+
+

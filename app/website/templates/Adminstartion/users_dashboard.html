@@ -54,7 +54,7 @@
                     <tbody>
                         {% for user in role.users %}
                         <tr>
-                            <td>{{ user.id }}</td>
+                            <td><a href="{{ url_for('admindash.view_user', user_id=user.id) }}">{{ user.id }}</a></td>
                             <td>{{ user.first_name }}</td>
                             <td>{{ user.last_name }}</td>
                             <td>{{ user.email }}</td>

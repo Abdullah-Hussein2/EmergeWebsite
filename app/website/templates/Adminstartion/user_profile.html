@@ -1,0 +1,47 @@
+{% extends "Core/base.html" %}
+
+{% block title %}
+User Profile
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header text-center">
+            <h2>User Profile</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Profile Image -->
+                <div class="col-md-4 text-center">
+                    {% if user.image %}
+                        <img src="{{ url_for('admindash.view_user', user_id=user.id) }}" class="img-fluid rounded-circle"
+                             alt="Profile Image">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle" alt="No Image">
+                    {% endif %}
+                </div>
+                <!-- User Info -->
+                <div class="col-md-8">
+                    <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Phone:</strong> {{ user.phone_number or 'N/A' }}</p>
+                    <p><strong>Description:</strong> {{ user.description or 'N/A' }}</p>
+                    <p><strong>Date Created:</strong> {{ user.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <h5>Roles:</h5>
+                    <ul>
+                        {% for role in roles %}
+                            <li>{{ role.name }}</li>
+                        {% else %}
+                            <li>No roles assigned</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{{ url_for('admindash.Users_dashboard') }}" class="btn btn-secondary">Back to Users Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

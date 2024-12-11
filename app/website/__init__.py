@@ -19,6 +19,7 @@ def create_app():
     app.config['SECRET_KEY'] = "helloworld"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
     app.config['USER_ENABLE_EMAIL'] = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config['USER_APP_NAME'] = 'Emarge'  # Change app name as needed
 
     # Initialize extensions

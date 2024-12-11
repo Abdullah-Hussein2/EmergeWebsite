@@ -1,51 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'Core/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMERGE.</title>
+{% block title %}
+	Home Page | Emearg
+{% endblock %}
+    {% block content %}
 
-    <!-- swiper link  -->
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-
-    <!-- cdn icon link  -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- custom css file  -->
-    <link rel="stylesheet" href="static/style.css">
-
-</head>
-
-<body>
-
-    <!-- header section start here  -->
-    <header class="header">
-        <div class="logoContent">
-            <a href="#" class="logo"><img src="static/logoemerge.png" alt=""></a>
-            <h1 class="logoName">EMERGE. </h1>
-        </div>
-
-        <nav class="navbar">
-            <a href="index.html">home</a>
-            <a href="#product">Our divitions</a>
-            <a href="#contact">contact</a>
-            <a href="logIn.html">Log in</a>
-        </nav>
-
-        <div class="icon">
-            <i class="fas fa-search" id="search"></i>
-            <i class="fas fa-bars" id="menu-bar"></i>
-        </div>
-
-        <div class="search">
-            <input type="search" placeholder="search...">
-        </div>
-    </header>
-    <!-- header section end here  -->
-
-    <!-- home section start here  -->
-    <section class="home" id="home">
+        <section class="home" id="home">
         <div class="homeContent">
             <h2>Welcome to EMERGE! </h2>
             <p>Where innovation meets effective solutions to meet your needs. At EMERGE, we deliver cutting-edge services and solutions that ensure your success and growth in the ever-evolving business world.
@@ -235,49 +195,5 @@
             </div>
         </div>
     </section>
-    <!-- review section ends here  -->
 
-    <!-- footer section start here  -->
-
-    <footer class="footer" id="contact">
-        <div class="box-container">
-            <div class="box" style="padding-left: 100px">
-                <h3>Quick link</h3>
-                <a href="index.html"> <i class="fas fa-arrow-right"></i>Home</a>
-                <a href="#"> <i class="fas fa-arrow-right"></i>Our Divition</a>
-                <a href="#"> <i class="fas fa-arrow-right"></i>Contact</a>
-            </div>
-            <div class="box">
-                <h3>Contact Info</h3>
-                <a href="#"> <i class="fas fa-phone"></i>+91 12222 34444</a>
-                <a href="#"> <i class="fas fa-envelope"></i>EMERGE@gmail.com</a>
-            </div>
-        </div>
-        <div class="share">
-            <a href="#" class="fab fa-facebook-f"></a>
-            <a href="#" class="fab fa-twitter"></a>
-            <a href="#" class="fab fa-instagram"></a>
-            <a href="#" class="fab fa-linkedin"></a>
-            <a href="#" class="fab fa-pinterest"></a>
-        </div>
-    </footer>
-
-
-
-
-
-
-
-
-
-
-    <!-- swiper js link  -->
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-
-    <!-- custom js file  -->
-    <script src="/static/index.js"></script>
-
-
-</body>
-
-</html>
+    {% endblock %}
