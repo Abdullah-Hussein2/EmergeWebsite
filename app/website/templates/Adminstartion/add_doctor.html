@@ -15,38 +15,66 @@
         </div>
         <div class="card-body">
             <form method="POST" enctype="multipart/form-data">
+                <!-- First Name -->
                 <div class="mb-3">
                     <label for="first_name" class="form-label">First Name</label>
                     <input type="text" name="first_name" class="form-control" required>
                 </div>
+
+                <!-- Last Name -->
                 <div class="mb-3">
                     <label for="last_name" class="form-label">Last Name</label>
                     <input type="text" name="last_name" class="form-control" required>
                 </div>
+
+                <!-- Email -->
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="email" name="email" class="form-control" required>
                 </div>
+
+                <!-- Password -->
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
+
+                <!-- Phone Number -->
                 <div class="mb-3">
                     <label for="phone_number" class="form-label">Phone Number</label>
                     <input type="text" name="phone_number" class="form-control">
                 </div>
+
+                <!-- Description -->
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
                     <textarea name="description" class="form-control"></textarea>
                 </div>
+
+                <!-- Profile Image -->
                 <div class="mb-3">
                     <label for="image" class="form-label">Profile Image</label>
                     <input type="file" name="image" class="form-control">
                 </div>
+
+                <!-- Existing Specialization Dropdown -->
                 <div class="mb-3">
-                    <label for="specialization" class="form-label">Specialization</label>
-                    <input type="text" name="specialization" class="form-control" required>
+                    <label for="existing_specialization" class="form-label">Choose Specialization (Optional)</label>
+                    <select id="existing_specialization" name="existing_specialization" class="form-control">
+                        <option value="">-- Select Specialization --</option>
+                        {% for specialization in specializations %}
+                            <option value="{{ specialization }}">{{ specialization }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+
+                <!-- New Specialization Input (Optional) -->
+                <div class="mb-3">
+                    <label for="new_specialization" class="form-label">Or Create New Specialization</label>
+                    <input type="text" id="new_specialization" name="new_specialization" class="form-control" placeholder="Enter new specialization">
+                </div>
+
+                <!-- Available -->
                 <div class="mb-3">
                     <label for="available" class="form-label">Available</label>
                     <select name="available" class="form-control">
@@ -54,6 +82,8 @@
                         <option value="No">No</option>
                     </select>
                 </div>
+
+                <!-- Roles (Multi-select Dropdown) -->
                 <div class="mb-3">
                     <label for="role_ids" class="form-label">Roles</label>
                     <select name="role_ids[]" class="form-control" multiple>
@@ -62,14 +92,35 @@
                         {% endfor %}
                     </select>
                 </div>
+
+                <!-- Submit Button -->
                 <button type="submit" class="btn btn-success">Add Doctor</button>
+                <!-- Cancel Button -->
+                <a href="{{ url_for('admindash.Doctors_dashboard') }}" class="btn btn-danger mt-3 w-100">Cancel</a>
             </form>
-            <a href="{{ url_for('admindash.Doctors_dashboard') }}" class="btn btn-danger mt-3 w-100">Cancel</a>
         </div>
     </div>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Optional: Ensure only one between dropdown and input box is filled
+    const newSpecializationInput = document.getElementById('new_specialization');
+    const existingSpecializationSelect = document.getElementById('existing_specialization');
+
+    newSpecializationInput.addEventListener('input', function () {
+        if (newSpecializationInput.value.trim() !== '') {
+            existingSpecializationSelect.value = ''; // Clear dropdown if input is filled
+        }
+    });
+
+    existingSpecializationSelect.addEventListener('change', function () {
+        if (existingSpecializationSelect.value !== '') {
+            newSpecializationInput.value = ''; // Clear input if dropdown is selected
+        }
+    });
+</script>
 </body>
 </html>

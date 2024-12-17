@@ -1,0 +1,21 @@
+{% extends 'Adminstartion/admin_base.html' %}
+
+{% block title %}
+    Admin Configuration
+{% endblock %}
+
+{% block content %}
+    <section class="config">
+        <div class="container">
+            <h2>Configuration Settings</h2>
+            <form method="POST" action="{{ url_for('admindash.update_config') }}">
+                <div class="form-group">
+                    <label for="DOCTOR_LIMIT">Number of Doctors per Category</label>
+                    <input type="number" name="DOCTOR_LIMIT" id="DOCTOR_LIMIT" class="form-control" value="{{ current_limit }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-success">Update Settings</button>
+            </form>
+        </div>
+    </section>
+{% endblock %}

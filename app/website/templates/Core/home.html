@@ -1,199 +1,86 @@
 {% extends 'Core/base.html' %}
 
 {% block title %}
-	Home Page | Emearg
+    Home Page | EMERGE
 {% endblock %}
-    {% block content %}
 
-        <section class="home" id="home">
+{% block content %}
+
+    <section class="home" id="home">
         <div class="homeContent">
             <h2>Welcome to EMERGE! </h2>
             <p>Where innovation meets effective solutions to meet your needs. At EMERGE, we deliver cutting-edge services and solutions that ensure your success and growth in the ever-evolving business world.
-                 Join us today and experience our commitment to always delivering the best!</p>
+                Join us today and experience our commitment to always delivering the best!</p>
             <div class="home-btn">
-                <a href="#"><button>see more</button></a>
+                <a href="#"><button>See More</button></a>
             </div>
         </div>
     </section>
 
-    <!-- home section end here  -->
+    <!-- Home section ends here  -->
 
-    <!-- product section start here  -->
-    <section class="product" id="product">
-    <div class="heading">
-        <h2>Internal Doctors</h2>
-    </div>
-    <div class="swiper product-row">
-        <div class="swiper-wrapper">
-            {% for doc in internal_doctors %}
-                <div class="swiper-slide box">
-                    <div class="img">
-                        <img src="{{ doc.image }}" alt="Doctor Image">
-                    </div>
-                    <div class="product-content">
-                        <h3>Dr. {{ doc.first_name }} {{ doc.last_name }}</h3>
-                        <p>{{ doc.description }}</p>
-                        <div class="orderNow">
-                            <button>Visit</button>
+    {% for heading, doctors in [
+        ('Internal Doctors', internal_doctors),
+        ('Dermatologist Doctors', Dermatologist),
+        ('Endocrinologist Doctors', Endocrinologist),
+        ('Orthopedic Doctors', Orthopedic),
+        ('Cardiologist Doctors', Cardiologist),
+        ('Ophthalmologists', ophthalmologists),
+    ] %}
+
+        <section class="product" id="product">
+            <div class="heading">
+                <h2>{{ heading }}</h2>
+            </div>
+
+            <div class="swiper product-row">
+                <div class="swiper-wrapper">
+                    {% for doc in doctors %}
+                        <div class="swiper-slide box">
+                            <div class="img">
+                                <img src="{{ url_for('views.doctor_image', doctor_id=doc.id) }}" alt="Doctor Image">
+                            </div>
+                            <div class="product-content">
+                                <h3>Dr. {{ doc.first_name }} {{ doc.last_name }}</h3>
+                                <p>{{ doc.description }}</p>
+                                <div class="orderNow">
+                                    <a href="{{ url_for('admindash.doctor_profile', doctor_id=doc.id) }}">
+                                        <button>Visit</button>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        </div>
-        <div class="swiper-pagination"></div>
-    </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </section>
 
-    <div class="heading">
-        <h2>Ophthalmologists</h2>
-    </div>
-    <div class="swiper product-row">
-        <div class="swiper-wrapper">
-            {% for doc in ophthalmologists %}
-                <div class="swiper-slide box">
-                    <div class="img">
-                        <img src="{{ doc.image }}" alt="Doctor Image">
-                    </div>
-                    <div class="product-content">
-                        <h3>Dr. {{ doc.first_name }} {{ doc.last_name }}</h3>
-                        <p>{{ doc.description }}</p>
-                        <div class="orderNow">
-                            <button>Visit</button>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        <div class="swiper-pagination"></div>
-    </div>
-</section>
+    {% endfor %}
 
-    <!-- product section end here  -->
-
-    <!-- blogs section start here  -->
+    <!-- Blogs section starts here  -->
     <section class="blogs" id="blogs">
 
-        <div class=" swiper blogs-row">
+        <div class="swiper blogs-row">
             <div class="swiper-wrapper">
-                <div class=" swiper-slide box">
+                <div class="swiper-slide box">
                     <div class="img">
                         <img src="static/doctorsArtboard-5.png" alt="">
                     </div>
                     <div class="content">
-                        <h3>Caramel Bourbon Vanilla Cupcakes </h3>
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi dolorum voluptatum
-                            corporis accusamus aperiam fugiat tempora blanditiis labore dolor aliquid maxime nobis
-                            laborum sed soluta voluptatibus aspernatur natus, dicta quisquam.</p>
-                        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Totam ab ullam reiciendis sint
-                            eaque at.</p>
-                        <a href="#blogs" class="btn">learn more</a>
+                        <h3>Caramel Bourbon Vanilla Cupcakes</h3>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi dolorum voluptatum...</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam ab ullam reiciendis...</p>
+                        <a href="#blogs" class="btn">Learn more</a>
                     </div>
                 </div>
-                <div class=" swiper-slide box">
-                    <div class="img">
-                        <img src="static/doctorsArtboard-3.png" alt="">
-                    </div>
-                    <div class="content">
-                        <h3>Caramel Bourbon Vanilla Cupcakes </h3>
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi dolorum voluptatum
-                            corporis accusamus aperiam fugiat tempora blanditiis labore dolor aliquid maxime nobis
-                            laborum sed soluta voluptatibus aspernatur natus, dicta quisquam.</p>
-                        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Totam ab ullam reiciendis sint
-                            eaque at.</p>
-                        <a href="#blogs" class="btn">learn more</a>
-                    </div>
-                </div>
-                <div class=" swiper-slide box">
-                    <div class="img">
-                        <img src="static/doctorsArtboard-1.png" alt="">
-                    </div>
-                    <div class="content">
-                        <h3>Caramel Bourbon Vanilla Cupcakes </h3>
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi dolorum voluptatum
-                            corporis accusamus aperiam fugiat tempora blanditiis labore dolor aliquid maxime nobis
-                            laborum sed soluta voluptatibus aspernatur natus, dicta quisquam.</p>
-                        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Totam ab ullam reiciendis sint
-                            eaque at.</p>
-                        <a href="#blogs" class="btn">learn more</a>
-                    </div>
-                </div>
+                <!-- Repeat similar structure for more slides -->
             </div>
             <div class="swiper-button-next"></div>
             <div class="swiper-button-prev"></div>
             <div class="swiper-pagination"></div>
-
-
         </div>
     </section>
-    <section class="review" id="review">
-        <div class="heading">
-            <h2>client review</h2>
-        </div>
-        <div class=" swiper review-row">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide box">
-                    <div class="client-review">
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Provident, perferendis architecto
-                            quasi eveniet aliquam sed?</p>
-                    </div>
-                    <div class="client-info">
-                        <div class="img">
-                            <img src="static/logoemerge.png" alt="">
-                        </div>
-                        <div class="clientDetailed">
-                            <h3>EMERGE</h3>
-                            <p>UI / UX designer</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide box">
-                    <div class="client-review">
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Provident, perferendis architecto
-                            quasi eveniet aliquam sed?</p>
-                    </div>
-                    <div class="client-info">
-                        <div class="img">
-                            <img src="static/logoemerge.png" alt="">
-                        </div>
-                        <div class="clientDetailed">
-                            <h3>EMERGE</h3>
-                            <p>UI / UX designer</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide box">
-                    <div class="client-review">
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Provident, perferendis architecto
-                            quasi eveniet aliquam sed?</p>
-                    </div>
-                    <div class="client-info">
-                        <div class="img">
-                            <img src="static/logoemerge.png" alt="">
-                        </div>
-                        <div class="clientDetailed">
-                            <h3>EMERGE</h3>
-                            <p>UI / UX designer</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide box">
-                    <div class="client-review">
-                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Provident, perferendis architecto
-                            quasi eveniet aliquam sed?</p>
-                    </div>
-                    <div class="client-info">
-                        <div class="img">
-                            <img src="static/logoemerge.png" alt="">
-                        </div>
-                        <div class="clientDetailed">
-                            <h3>Hardy Devid</h3>
-                            <p>UI / UX designer</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-pagination"></div>
+    <!-- Blogs section ends here -->
 
-            </div>
-        </div>
-    </section>
-
-    {% endblock %}
+{% endblock %}

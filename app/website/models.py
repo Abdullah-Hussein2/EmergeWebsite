@@ -4,16 +4,13 @@ from sqlalchemy.sql import func
 
 
 
-
-
-
 #making the db tablas (***DO NOT CHANGE WITHOUT CONTACTING "ABDULLAH")
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(20), nullable=False)
+    last_name = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(150), nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     is_active = db.Column(db.Boolean(), nullable=False, server_default='1')
@@ -57,15 +54,13 @@ class DoctorRoles(db.Model):
 
 
 
-
-
 class Doctor(db.Model):
     __tablename__ = 'doctors'
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(20), nullable=False)
+    last_name = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(150), nullable=False)
     description = db.Column(db.String(10000))
     image = db.Column(db.LargeBinary)
@@ -73,3 +68,22 @@ class Doctor(db.Model):
     specialization = db.Column(db.String(100), nullable=False)
     available = db.Column(db.String(100), nullable=False)
     roles = db.relationship('Role', secondary='doctor_roles', backref='doctors', lazy='dynamic', passive_deletes=True)
+    featured = db.Column(db.Boolean, default=False)  # NEW:
+
+    # Add relationship with posts
+    posts = db.relationship('Post', back_populates='doctor', cascade='all, delete-orphan')
+
+
+
+
+
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    date_posted = db.Column(db.DateTime(timezone=True), default=func.now())
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='CASCADE'))  # Link to Doctor
+    doctor = db.relationship('Doctor', back_populates='posts')  # Establish relationship

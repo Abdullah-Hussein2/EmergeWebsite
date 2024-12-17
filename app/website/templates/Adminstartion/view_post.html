@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }}</title>
+    <!-- Include TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .action-buttons > form {
+            display: inline; /* Keep delete button inline */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="max-w-5xl mx-auto px-6 py-8">
+        <!-- Back Button -->
+        <a href="{{ url_for('admindash.doctor_profile', doctor_id=post.doctor_id) }}"
+           class="inline-block text-blue-500 text-sm font-medium hover:underline mb-4">
+            &larr; Back to Doctor Profile
+        </a>
+
+        <!-- Post Content Wrapper -->
+        <article class="bg-white shadow rounded-lg p-6">
+            <!-- Post Title -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ post.title }}</h1>
+
+            <!-- Post Metadata -->
+            <div class="mb-4 text-sm text-gray-500 flex justify-between">
+                <span>
+                    Posted on {{ post.date_posted.strftime('%B %d, %Y') }} by
+                    {{ post.doctor.first_name }} {{ post.doctor.last_name }}
+                </span>
+
+                <!-- Admin Actions -->
+                {% if current_user.is_authenticated and current_user.has_roles('Admin') %}
+                <div class="action-buttons">
+                    <a href="{{ url_for('admindash.edit_post', post_id=post.id) }}"
+                       class="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500 text-sm mr-2">
+                        Edit
+                    </a>
+                    <form action="{{ url_for('admindash.delete_post', post_id=post.id) }}" method="POST" class="inline">
+                        <button type="submit"
+                                class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                                onclick="return confirm('Are you sure you want to delete this post?')">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Divider -->
+            <hr class="my-4 border-gray-300">
+
+            <!-- Post Content -->
+            <div class="prose max-w-none text-gray-700">
+                {{ post.content | safe }}
+            </div>
+        </article>
+    </div>
+
+</body>
+</html>

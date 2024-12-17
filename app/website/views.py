@@ -11,11 +11,27 @@ views = Blueprint("views", __name__)
 @views.route("/")
 @views.route("/home")
 def home():
-    internal_doctors = Doctor.query.filter_by(specialization='Internal').limit(5).all()
-    ophthalmologists = Doctor.query.filter_by(specialization='Ophthalmologist').limit(5).all()
-    return render_template("Core/home.html", 
-                           internal_doctors=internal_doctors, 
-                           ophthalmologists=ophthalmologists)
+    # Featured doctors only
+    internal_doctors = Doctor.query.filter_by(specialization='Internal', featured=True).limit(5).all()
+    Dermatologist = Doctor.query.filter_by(specialization='Dermatologist', featured=True).limit(5).all()
+    Endocrinologist = Doctor.query.filter_by(specialization='Endocrinologist', featured=True).limit(5).all()
+    Orthopedic = Doctor.query.filter_by(specialization='Orthopedic', featured=True).limit(5).all()
+    Cardiologist = Doctor.query.filter_by(specialization='Cardiologist', featured=True).limit(5).all()
+    ophthalmologists = Doctor.query.filter_by(specialization='Ophthalmologist', featured=True).limit(5).all()
+
+    return render_template(
+        "Core/home.html",
+        internal_doctors=internal_doctors,
+        Dermatologist=Dermatologist,
+        Endocrinologist=Endocrinologist,
+        Orthopedic=Orthopedic,
+        Cardiologist=Cardiologist,
+        ophthalmologists=ophthalmologists
+    )
+
+
+
+
 
 
 # Route to serve user image from database
@@ -38,7 +54,6 @@ def forbidden_error(error):
 
 
 @views.route('/doctors')
-@login_required
 def view_doctors():
     doctors = Doctor.query.all()
     return render_template('Adminstartion/view_doctors.html', doctors=doctors)
@@ -47,10 +62,10 @@ def view_doctors():
 
 
 
-@views.route('/services')
-def services():
-    if not current_user.is_authenticated or not current_user.has_roles('Admin'):
-        abort(403)
-    return render_template('Core/services.html')
 
-
+@views.route('/doctor_image/<int:doctor_id>')
+def doctor_image(doctor_id):
+    doctor = Doctor.query.get_or_404(doctor_id)
+    if doctor.image:
+        return Response(doctor.image, mimetype='image/jpeg')
+    return "Image not found", 404

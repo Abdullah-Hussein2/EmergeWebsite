@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Post</title>
+    <!-- Include TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <!-- QuillJS WYSIWYG editor (for content formatting) -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-center">
+    <div class="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <!-- Header -->
+        <h1 class="text-2xl font-semibold text-gray-800 mb-6">Add Post for {{ doctor.first_name }} {{ doctor.last_name }}</h1>
+
+        <!-- Form -->
+        <form method="POST" id="add-post-form">
+            <!-- Title -->
+            <div class="mb-4">
+                <label for="title" class="block text-sm font-medium text-gray-700">Post Title</label>
+                <input type="text" id="title" name="title" placeholder="Enter the title of your post"
+                       class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                       required>
+            </div>
+
+            <!-- Content -->
+            <div class="mb-4">
+                <label for="content" class="block text-sm font-medium text-gray-700">Post Content</label>
+                <div id="editor" class="mt-1 border border-gray-300 rounded-lg p-4 min-h-[200px] bg-white"></div>
+                <textarea name="content" id="content" class="hidden"></textarea> <!-- Hidden field for submitting HTML-rendered content -->
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-right">
+                <button type="submit"
+                        class="inline-block px-4 py-2 bg-blue-500 text-white font-medium rounded shadow hover:bg-blue-600 transition">
+                    Add Post
+                </button>
+            </div>
+        </form>
+
+        <!-- Script for QuillJS -->
+        <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+        <script>
+            // Initialize Quill editor
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                placeholder: "Write your post...",
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],        // Basic text styles
+                        ['blockquote', 'code-block'],                   // Block styles
+                        [{ 'header': 1 }, { 'header': 2 }],             // Headers
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],  // Lists
+                        [{ 'script': 'sub' }, { 'script': 'super' }],   // Superscript / Subscript
+                        [{ 'align': [] }],                              // Text alignment
+                        ['link', 'image'],                              // Links and images
+                        ['clean']                                       // Remove formatting
+                    ]
+                }
+            });
+
+            // Sync Quill content to the hidden `textarea#content` for form submission
+            const form = document.getElementById('add-post-form');
+            form.addEventListener('submit', () => {
+                const content = document.querySelector('textarea#content');
+                content.value = quill.root.innerHTML;
+            });
+        </script>
+    </div>
+</body>
+</html>

@@ -1,82 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Doctor</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header">
-            <h2 class="text-center">Edit Doctor Details</h2>
-        </div>
-        <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" name="first_name" class="form-control" value="{{ doctor.first_name }}" required>
+{% extends 'Adminstartion/admin_base.html' %}
+
+{% block title %}
+    Edit Doctor
+{% endblock %}
+
+{% block content %}
+    <section class="doctor-edit">
+        <div class="container">
+            <h2>Edit Doctor</h2>
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('admindash.edit_doctor', doctor_id=doctor.id) }}">
+
+                <!-- Doctor Information -->
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control" value="{{ doctor.first_name }}" required>
                 </div>
-                <div class="mb-3">
-                    <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" name="last_name" class="form-control" value="{{ doctor.last_name }}" required>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control" value="{{ doctor.last_name }}" required>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" value="{{ doctor.email }}" required>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" class="form-control" value="{{ doctor.email }}" required>
                 </div>
-                <div class="mb-3">
-                    <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" name="phone_number" class="form-control" value="{{ doctor.phone_number }}">
-                </div>
-                <div class="mb-3">
-                    <label for="specialization" class="form-label">Specialization</label>
-                    <select name="specialization" class="form-control">
-                        <option value="">Select a specialization</option>
-                        {% for spec in specializations %}
-                            <option value="{{ spec }}" {% if doctor.specialization == spec %}selected{% endif %}>{{ spec }}</option>
+
+                <div class="form-group">
+                    <label for="specialization">Specialization</label>
+                    <select name="specialization" id="specialization" class="form-control">
+                        {% for specialization in specializations %}
+                            <option value="{{ specialization }}" {% if doctor.specialization == specialization %}selected{% endif %}>
+                                {{ specialization }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label for="new_specialization" class="form-label">Or Add New Specialization</label>
-                    <input type="text" name="new_specialization" class="form-control" placeholder="Enter new specialization">
-                </div>
-                <div class="mb-3">
-                    <label for="available" class="form-label">Available</label>
-                    <select name="available" class="form-select">
-                        <option value="Yes" {% if doctor.available == 'Yes' %}selected{% endif %}>Yes</option>
-                        <option value="No" {% if doctor.available == 'No' %}selected{% endif %}>No</option>
+
+                <div class="form-group">
+                    <label for="featured">Feature this Doctor on Home Page</label>
+                    <select name="featured" id="featured" class="form-control">
+                        <option value="True" {% if doctor.featured %}selected{% endif %}>Yes</option>
+                        <option value="False" {% if not doctor.featured %}selected{% endif %}>No</option>
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea name="description" class="form-control" rows="3">{{ doctor.description }}</textarea>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description" class="form-control" required>{{ doctor.description }}</textarea>
                 </div>
-                <div class="mb-3">
-                    <label for="image" class="form-label">Profile Image</label>
-                    <input type="file" name="image" class="form-control">
+
+                <!-- Image Upload -->
+                <div class="form-group">
+                    <label for="image">Doctor Image</label>
+                    <input type="file" name="image" id="image" class="form-control">
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">New Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter new password (optional)">
-                </div>
-                <div class="mb-3">
-                    <label for="role_ids" class="form-label">Roles</label>
-                    <select name="role_ids[]" class="form-control" multiple>
-                        {% for role in roles %}
-                            <option value="{{ role.id }}" {% if role in doctor.roles %}selected{% endif %}>{{ role.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
-            <a href="{{ url_for('admindash.Doctors_dashboard') }}" class="btn btn-danger mt-3 w-100">Cancel</a>
         </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </section>
+{% endblock %}

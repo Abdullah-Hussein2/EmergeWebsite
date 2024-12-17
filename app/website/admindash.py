@@ -1,12 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, Response
 from flask_login import login_required, current_user
 from flask_user import roles_required
-from .models import User, Role , Doctor
+from .models import User, Role , Doctor , Post
 from . import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
-
 
 admindash = Blueprint("admindash", __name__)
 
@@ -254,76 +253,48 @@ def Doctors_dashboard():
 
 
 
-
-
-
-
-
-
 @admindash.route("/edit_doctor/<int:doctor_id>", methods=["GET", "POST"])
 @login_required
 @roles_required('Admin')
 def edit_doctor(doctor_id):
-    # Fetch the doctor from the database
+    # Get the doctor record by ID
     doctor = Doctor.query.get_or_404(doctor_id)
 
     if request.method == 'POST':
-        # Retrieve form fields
-        doctor.first_name = request.form['first_name']
-        doctor.last_name = request.form['last_name']
-        doctor.email = request.form['email']
-        doctor.phone_number = request.form['phone_number']
-        doctor.description = request.form['description']
-        role_ids = request.form.getlist('role_ids')  # Get selected roles
-        password = request.form.get('password')
+        # Retrieve form data from request
+        doctor.first_name = request.form.get('first_name', '').strip()
+        doctor.last_name = request.form.get('last_name', '').strip()
+        doctor.email = request.form.get('email', '').strip()
+        doctor.specialization = request.form.get('specialization', '').strip()
+        doctor.featured = (request.form.get('featured') == 'True')  # Convert to boolean
+        doctor.description = request.form.get('description', '').strip()
 
-        # Update specialization
-        specialization = request.form['specialization'] or request.form['new_specialization']
-        doctor.specialization = specialization
-
-        # Update availability
-        doctor.available = request.form.get('available', 'No')
-
-        # Update roles
-        new_roles = Role.query.filter(Role.id.in_(role_ids)).all()  # Fetch selected roles
-        doctor.roles = new_roles
-
-        # Update password if provided
-        if password:
-            if len(password) < 6:
-                flash('Password must be at least 6 characters long.', 'danger')
-                return redirect(url_for('admindash.edit_doctor', doctor_id=doctor.id))
-            doctor.password = generate_password_hash(password)
-
-        # Handle image upload
+        # Handle file upload
         image = request.files.get('image')
         if image:
-            doctor.image = image.read()
+            doctor.image = image.read()  # Save image data to database
 
-        # Commit changes to the database
+        # Save the updated doctor information to the database
         try:
-            db.session.commit()
-            flash('Doctor updated successfully!', 'success')
-            return redirect(url_for('admindash.Doctors_dashboard'))
-        except SQLAlchemyError:
-            db.session.rollback()  # Rollback changes on error
-            flash('An error occurred while updating the doctor.', 'danger')
+            db.session.commit()  # Commit changes
+            flash("Doctor updated successfully!", "success")
+            return redirect(url_for('admindash.Doctors_dashboard'))  # Redirect to dashboard
+        except SQLAlchemyError as e:
+            db.session.rollback()  # Rollback in case of error
+            flash("An error occurred while updating the doctor.", "danger")
 
-    # Query all roles for the roles dropdown
-    roles = Role.query.all()
-
-    # Query most common specializations
-    most_common_specializations = db.session.query(
-        Doctor.specialization, db.func.count(Doctor.specialization).label('count')
-    ).group_by(Doctor.specialization).order_by(db.desc('count')).limit(20).all()
-    specializations = [s[0] for s in most_common_specializations]
-
-    return render_template(
-        'Adminstartion/edit_doctor.html',
-        doctor=doctor,
-        roles=roles,
-        specializations=specializations
+    # Fetch distinct specializations for the dropdown in the template
+    specializations = (
+        db.session.query(Doctor.specialization)
+        .distinct()
+        .order_by(Doctor.specialization)
+        .all()
     )
+    specializations = [s[0] for s in specializations]  # Convert to a list of values
+
+    # Render the template, passing the doctor and dropdown options
+    return render_template('Adminstartion/edit_doctor.html', doctor=doctor, specializations=specializations)
+
 
 
 
@@ -357,11 +328,15 @@ def add_doctor():
         password = request.form['password']
         phone_number = request.form['phone_number']
         description = request.form['description']
-        specialization = request.form['specialization']
         available = request.form.get('available', 'No')
         role_ids = request.form.getlist('role_ids')  # Get selected roles
         image = request.files['image']
         image_binary = image.read() if image else None
+
+        # Handle Specialization
+        new_specialization = request.form.get('new_specialization', '').strip()
+        existing_specialization = request.form.get('existing_specialization', '').strip()
+        specialization = new_specialization if new_specialization else existing_specialization
 
         # Validate required fields
         if not (email and first_name and last_name and password and specialization):
@@ -374,7 +349,7 @@ def add_doctor():
             flash('A doctor with this email already exists.', 'danger')
             return redirect(url_for('admindash.add_doctor'))
 
-        # Create a Doctor record
+        # Create a new Doctor record
         new_doctor = Doctor(
             email=email,
             first_name=first_name,
@@ -393,7 +368,7 @@ def add_doctor():
             if role:
                 new_doctor.roles.append(role)
 
-        # Commit to the database
+        # Save the new doctor to the database
         db.session.add(new_doctor)
         try:
             db.session.commit()
@@ -403,11 +378,10 @@ def add_doctor():
             db.session.rollback()
             flash('An error occurred while adding the doctor.', 'danger')
 
-    # Query specializations and all roles
+    # Fetch specializations and roles for dropdowns
     most_common_specializations = db.session.query(
         Doctor.specialization, db.func.count(Doctor.specialization).label('count')
     ).group_by(Doctor.specialization).order_by(db.desc('count')).limit(20).all()
-
     specializations = [s[0] for s in most_common_specializations]
     roles = Role.query.all()  # Fetch all roles
 
@@ -426,18 +400,18 @@ def view_doctor_image(doctor_id):
 
 
 @admindash.route('/doctor_profile/<int:doctor_id>', methods=['GET'])
-@login_required
 def doctor_profile(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
-    return render_template('Adminstartion/doctor_profile.html', doctor=doctor)
-
-
-
+    page = request.args.get('page', 1, type=int)  # Get the current page from query parameters; default is 1
+    posts = Post.query.filter_by(doctor_id=doctor_id).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5,
+                                                                                                 error_out=False)
+    return render_template('Auth/doctor_profile.html', doctor=doctor, posts=posts)
 
 @admindash.route('/doctor_analytics', methods=['GET'])
 @login_required
 @roles_required('Admin')
 def doctor_analytics():
+    # Query database for specializations and doctor counts
     specializations_data = (
         db.session.query(
             Doctor.specialization,
@@ -448,9 +422,12 @@ def doctor_analytics():
         .all()
     )
 
+    # Convert the query results into a list of dictionaries
     specializations = [{'name': spec[0], 'count': spec[1]} for spec in specializations_data]
 
+    # Pass to the template
     return render_template('Adminstartion/doctor_analytics.html', specializations=specializations)
+
 
 
 @admindash.route('/search_doctors', methods=['GET'])
@@ -473,3 +450,110 @@ def search_doctors():
 
     # Render a result page with the filtered doctors
     return render_template('Adminstartion/search_results.html', doctors=doctors, query=query)
+
+
+
+
+
+@admindash.route('/add_post/<int:doctor_id>', methods=['GET', 'POST'])
+@login_required
+@roles_required('Admin')  # Ensure only Admins can create posts
+def add_post(doctor_id):
+    doctor = Doctor.query.get_or_404(doctor_id)
+
+    if request.method == 'POST':
+        # Get post data
+        title = request.form['title']
+        content = request.form['content']
+
+        # Create and save new post
+        new_post = Post(title=title, content=content, doctor_id=doctor_id)
+        db.session.add(new_post)
+        try:
+            db.session.commit()
+            flash('Post added successfully!', 'success')
+            return redirect(url_for('admindash.doctor_profile', doctor_id=doctor_id))
+        except:
+            db.session.rollback()
+            flash('An error occurred while adding the post.', 'danger')
+
+    return render_template('Adminstartion/add_post.html', doctor=doctor)
+
+
+@admindash.route('/post/<int:post_id>', methods=['GET'])
+def view_post(post_id):
+    # Fetch the post by ID
+    post = Post.query.get_or_404(post_id)  # Returns 404 if post does not exist
+    return render_template('Adminstartion/view_post.html', post=post)
+
+# Edit Post
+@admindash.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+@roles_required('Admin')
+def edit_post(post_id):
+    post = Post.query.get_or_404(post_id)
+
+    if request.method == 'POST':
+        # Update post details
+        post.title = request.form.get('title')
+        post.content = request.form.get('content')
+        try:
+            db.session.commit()
+            flash('Post updated successfully!', 'success')
+            return redirect(url_for('admindash.post_dashboard'))
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash('An error occurred while updating the post.', 'danger')
+
+    return render_template('Adminstartion/edit_post.html', post=post)
+
+
+# Delete Post
+@admindash.route('/delete_post/<int:post_id>', methods=['POST'])
+@login_required
+@roles_required('Admin')
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    try:
+        db.session.delete(post)
+        db.session.commit()
+        flash('Post deleted successfully!', 'success')
+    except SQLAlchemyError:
+        db.session.rollback()
+        flash('An error occurred while deleting the post.', 'danger')
+
+    return redirect(url_for('admindash.post_dashboard'))
+
+
+# Post Dashboard (Admin Only) with Search
+@admindash.route('/post_dashboard', methods=['GET'])
+@login_required
+@roles_required('Admin')
+def post_dashboard():
+    search_query = request.args.get('search', '').strip()  # Get search term from query string, default empty
+    posts = Post.query  # Base query
+
+    if search_query:
+        # Filter posts by title, doctor's name, or date
+        posts = posts.filter(
+            Post.title.ilike(f"%{search_query}%") |  # Case-insensitive title match
+            Post.doctor.first_name.ilike(f"%{search_query}%") |  # Doctor's first name
+            Post.doctor.last_name.ilike(f"%{search_query}%") |  # Doctor's last name
+            Post.date_posted.cast(String).ilike(f"%{search_query}%")  # Date as string
+        )
+
+    posts = posts.all()  # Execute the query
+    return render_template('Adminstartion/post_dashboard.html', posts=posts, search_query=search_query)
+
+
+@admindash.route('/update_config', methods=['POST'])
+@login_required
+@roles_required('Admin')
+def update_config():
+    doctor_limit = request.form.get('DOCTOR_LIMIT', '5')  # Default is 5
+    config = SiteConfig.query.filter_by(key='DOCTOR_LIMIT').first()
+    if config:
+        config.value = doctor_limit
+        db.session.commit()
+    flash('Config updated successfully!', 'success')
+    return redirect(url_for('admindash.doctor_analytics'))
