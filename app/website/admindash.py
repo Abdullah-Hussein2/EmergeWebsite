@@ -30,7 +30,7 @@ def Users_dashboard():
 
 
 
-# Add Role to User
+# Add Role to User (NOT USED ANY MORE)
 @admindash.route('/add_role_to_user', methods=['POST'])
 @login_required
 @roles_required('Admin')
@@ -182,7 +182,7 @@ def add_user():
 
 
 
-# View User profile
+# View User profile (NOT NEEDED)
 @admindash.route('/view_user/<int:user_id>', methods=['GET'])
 @login_required
 @roles_required('Admin')
@@ -196,7 +196,7 @@ def view_user(user_id):
 
 
 
-
+#(NOT NEEDED)
 @admindash.route('/Anlytics')
 @login_required
 @roles_required('Admin')
@@ -233,7 +233,7 @@ def Anlytics():
 
 
 
-
+# showing all the doctors in the db
 @admindash.route('/Doctors_dashboard', methods=['GET'])
 @login_required
 @roles_required('Admin')
@@ -389,14 +389,22 @@ def add_doctor():
 
 
 
+
+
+
+
+# used to show doc photo in the home page
 @admindash.route('/view_doctor_image/<int:doctor_id>', methods=['GET'])
-@login_required
-@roles_required('Admin')
 def view_doctor_image(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
     if doctor.image:
         return Response(doctor.image, mimetype='image/jpeg')
     return "No image available", 404
+
+
+
+
+
 
 
 @admindash.route('/doctor_profile/<int:doctor_id>', methods=['GET'])
@@ -406,6 +414,10 @@ def doctor_profile(doctor_id):
     posts = Post.query.filter_by(doctor_id=doctor_id).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5,
                                                                                                  error_out=False)
     return render_template('Auth/doctor_profile.html', doctor=doctor, posts=posts)
+
+
+
+
 
 @admindash.route('/doctor_analytics', methods=['GET'])
 @login_required
@@ -429,10 +441,8 @@ def doctor_analytics():
     return render_template('Adminstartion/doctor_analytics.html', specializations=specializations)
 
 
-
+# used to search for doctors in the home page
 @admindash.route('/search_doctors', methods=['GET'])
-@login_required
-@roles_required('Admin')
 def search_doctors():
     query = request.args.get('q', '')  # Get the search query from the request
     if not query:
@@ -486,7 +496,6 @@ def view_post(post_id):
     post = Post.query.get_or_404(post_id)  # Returns 404 if post does not exist
     return render_template('Adminstartion/view_post.html', post=post)
 
-# Edit Post
 @admindash.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 @login_required
 @roles_required('Admin')
@@ -508,7 +517,6 @@ def edit_post(post_id):
     return render_template('Adminstartion/edit_post.html', post=post)
 
 
-# Delete Post
 @admindash.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required
 @roles_required('Admin')

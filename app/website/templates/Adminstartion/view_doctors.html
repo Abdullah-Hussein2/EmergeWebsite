@@ -1,36 +1,176 @@
-{% extends "Core/base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors{% if selected_specialization %} - {{ selected_specialization }}{% endif %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
 
-    <h2>Doctors List</h2>
+<body class="bg-white text-gray-800">
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>id</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Specialization</th>
-            <th>Phone Number</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for doctor in doctors %}
-            <tr>
-                <td>
-                    <a href="{{ url_for('admindash.doctor_profile', doctor_id=doctor.id) }}">
-                        {{ doctor.id }}
+    <!-- Navbar -->
+    <nav class="bg-gray-100 shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-gray-800 hover:text-gray-600 transition">EMERGE</a>
+            <div class="space-x-6 text-sm font-bold">
+                <a href="/home" class="hover:text-gray-600 transition">Home</a>
+                <a href="#contact" class="hover:text-gray-600 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-b from-gray-100 to-gray-300 text-gray-800 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold">Find the Best Doctors</h1>
+            <p class="mt-4 text-lg font-medium">
+                {% if request.args.get('query') %}
+                    Results for "<span class="font-bold">{{ request.args.get('query') }}</span>"
+                {% elif selected_specialization %}
+                    Explore top doctors specialized in <span class="font-bold">{{ selected_specialization }}</span>
+                {% else %}
+                    Browse our full list of qualified doctors!
+                {% endif %}
+            </p>
+        </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="py-5 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <form method="GET" action="{{ url_for('views.view_doctors') }}" class="flex items-center gap-4">
+                <!-- Search Input -->
+                <div class="flex-1 relative">
+                    <input
+                        type="text"
+                        name="query"
+                        value="{{ request.args.get('query', '') }}"
+                        placeholder="Search doctors by name or specialization"
+                        class="w-full py-2 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    class="bg-gray-800 text-white px-5 py-2 rounded-lg hover:bg-gray-700 transition font-semibold">
+                    Search
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800">Filter by Specializations</h2>
+                <p class="text-gray-600">Explore doctors based on their area of expertise</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4">
+                <!-- 'View All' Button -->
+                <a href="{{ url_for('views.view_doctors', query=request.args.get('query', '')) }}"
+                   class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition{% if not selected_specialization %} bg-gray-700{% endif %}">
+                    View All
+                </a>
+                <!-- Specializations Filtering -->
+                {% for specialization in specializations %}
+                    <a href="{{ url_for('views.view_doctors', specialization=specialization, query=request.args.get('query', '')) }}"
+                       class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition{% if selected_specialization == specialization %} bg-gray-700 text-white{% endif %}">
+                        {{ specialization }}
                     </a>
-                </td>
-                <td>{{ doctor.first_name }}</td>
-                <td>{{ doctor.last_name }}</td>
-                <td>{{ doctor.email }}</td>
-                <td>{{ doctor.specialization }}</td>
-                <td>{{ doctor.phone_number }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
 
-{% endblock %}
+    <!-- Doctors Section -->
+    <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {% if doctors %}
+            <!-- Responsive Doctor Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {% for doctor in doctors %}
+                <div class="bg-gray-100 rounded-lg shadow hover:shadow-lg transition">
+                    <!-- Doctor Image -->
+                    <div class="relative bg-gray-300 rounded-t-lg overflow-hidden h-40">
+                        {% if doctor.image %}
+                            <img src="{{ url_for('admindash.view_doctor_image', doctor_id=doctor.id) }}"
+                                 alt="{{ doctor.first_name }}" class="object-cover h-full w-full">
+                        {% else %}
+                            <img src="https://via.placeholder.com/100/ddd?text=No+Image"
+                                 alt="No Image" class="object-cover w-full h-full">
+                        {% endif %}
+                    </div>
+
+                    <!-- Doctor Info -->
+                    <div class="p-6 text-center">
+                        <h3 class="text-lg font-bold text-gray-800">
+                            {{ doctor.first_name }} {{ doctor.last_name }}
+                        </h3>
+                        <p class="text-gray-600 text-sm mt-1">
+                            {{ doctor.specialization }}
+                        </p>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="border-t px-6 py-4">
+                        <p class="text-sm text-gray-800 mb-2">
+                            <strong>Email:</strong> 
+                            <a href="mailto:{{ doctor.email }}" class="text-gray-800 hover:underline">
+                                {{ doctor.email }}
+                            </a>
+                        </p>
+                        <p class="text-sm text-gray-800">
+                            <strong>Phone:</strong> 
+                            <a href="tel:{{ doctor.phone_number }}" class="text-gray-800 hover:underline">
+                                {{ doctor.phone_number }}
+                            </a>
+                        </p>
+                    </div>
+
+                    <!-- View Profile Button -->
+                    <div class="p-4 text-center">
+                        <a href="{{ url_for('admindash.doctor_profile', doctor_id=doctor.id) }}"
+                           class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-800 text-white hover:bg-gray-700 transition">
+                            View Profile
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- No Doctors Found -->
+            <div class="text-center py-16">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">No Doctors Found</h3>
+                <p class="text-gray-600">
+                    {% if request.args.get('query') %}
+                        We couldn't find any doctors matching "<span class="text-gray-800 font-medium">{{ request.args.get('query') }}</span>".
+                    {% else %}
+                        No doctors are available at the moment. Please try again later.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-600">
+                &copy; 2024 <span class="text-gray-800 font-bold">EMERGE</span>. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
