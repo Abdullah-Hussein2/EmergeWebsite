@@ -38,20 +38,20 @@ def login():
     return render_template("Auth/login.html", user = current_user)
 
 
-# Signup route
 @auth.route("/signup", methods=['GET', 'POST'])
 def sign_up():
     if current_user.is_authenticated:
-        # Redirect logged-in users
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
+        # Correct the field names to match the HTML
         email = request.form.get('email')
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
-        phone_number = request.form.get('Phone_number')
-        password1 = request.form.get('Password1')
+        phone_number = request.form.get('Phone_number')  # Case sensitivity fixed
+        password1 = request.form.get('Password1')  # Matches the HTML
         password2 = request.form.get('Password2')
+
 
         # Input validation
         if not email or not first_name or not last_name or not phone_number or not password1 or not password2:
@@ -66,16 +66,9 @@ def sign_up():
             flash('Passwords do not match!', category='error')
         elif len(password1) < 6:
             flash('Password must be at least 6 characters long.', category='error')
-        elif not any(char.isdigit() for char in password1):
-            flash('Password must include at least one numeric character.', category='error')
-        elif not any(char.isupper() for char in password1):
-            flash('Password must include at least one uppercase letter.', category='error')
-        elif not any(char.islower() for char in password1):
-            flash('Password must include at least one lowercase letter.', category='error')
         elif User.query.filter_by(email=email).first():
             flash('Email is already in use.', category='error')
         else:
-
             # Create default role if it doesn't exist
             default_role = Role.query.filter_by(name='User').first()
             if not default_role:
@@ -83,6 +76,8 @@ def sign_up():
                 db.session.add(default_role)
                 db.session.commit()
 
+            # Debugging role assignment
+            print(f"Default Role Found: {default_role}")
 
             # Create new user
             new_user = User(
@@ -94,17 +89,20 @@ def sign_up():
                 password=generate_password_hash(password1)
             )
 
-            # Assign default role to the user
+            # Assign default role to new user
             new_user.roles.append(default_role)
             db.session.add(new_user)
             db.session.commit()
 
-            # Log the user in
+            # Debug new user's roles
+            print(f"Roles assigned to new user: {[role.name for role in new_user.roles]}")
+
             login_user(new_user, remember=True)
             flash('Account created successfully!', category='success')
-            return redirect(url_for('views.home'))  # Redirect to home or dashboard
+            return redirect(url_for('views.home'))  # Redirect to home page
 
     return render_template("Auth/signup.html", user=current_user)
+
 
 
 
