@@ -1,10 +1,11 @@
 # Emerge
 A digital markting agecy
-collaboration:
-@Abdullah-Huseein2
-@Menomuhmed
+
 
 This is the final project for the CS50X-IRAQ.
+collaboration:
+@Abdullah-Huseein2 AS FullStack
+@Menomuhmed AS Front-end
 
 Installation:
 
