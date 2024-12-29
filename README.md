@@ -3,9 +3,9 @@ A digital markting agecy
 
 
 This is the final project for the CS50X-IRAQ.
-collaboration:
-@Abdullah-Huseein2 AS FullStack
-@Menomuhmed AS Front-end
+	collaboration:	
+	@Abdullah-Huseein2 AS FullStack
+	@Menomuhmed AS Front-end
 
 Installation:
 
