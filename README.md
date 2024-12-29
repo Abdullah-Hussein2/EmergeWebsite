@@ -1,5 +1,8 @@
-# Emerge_projectcs50x
-
+# Emerge
+A digital markting agecy
+collaboration:
+@Abdullah-Huseein2
+@Menomuhmed
 
 This is the final project for the CS50X-IRAQ.
 
